@@ -6,6 +6,7 @@ import com.oaklog.app.data.local.entity.CachedResourceEntity
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.async
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
@@ -32,7 +33,9 @@ class ResourceCache @Inject constructor(
     private var schemaChecked = false
     private val inFlight = HashMap<String, CompletableDeferred<String>>()
     private val lock = Mutex()
-    private val scope = CoroutineScope(Dispatchers.IO)
+    // SupervisorJob: one failed fetch must not cancel the scope, or every later request fails with
+    // "parent job is cancelled" until the app restarts.
+    private val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
 
     /**
      * Payloads are stored re-encoded through our DTOs, so a field added to a DTO later is missing
