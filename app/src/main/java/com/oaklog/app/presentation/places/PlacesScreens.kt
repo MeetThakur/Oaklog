@@ -297,7 +297,7 @@ private fun SpawnRow(spawn: AreaSpawn, game: String?, onPokemonClick: (Int) -> U
     val min = entries.filter { it.minLevel > 0 }.minOfOrNull { it.minLevel } ?: 0
     val max = entries.maxOfOrNull { it.maxLevel } ?: 0
     val chance = entries.maxOfOrNull { it.chance } ?: 0
-    val methods = entries.flatMap { it.methods }.distinct().joinToString(" · ") { NameFormatter.pretty(it) }
+    val methods = entries.flatMap { it.methods }.distinct().joinToString(" · ") { Places.methodLabel(it) }
     val clickable = spawn.speciesId != null
 
     Row(
@@ -328,13 +328,29 @@ private fun SpawnRow(spawn: AreaSpawn, game: String?, onPokemonClick: (Int) -> U
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis,
             )
-            Text(
-                listOf(methods, if (game == null) "${entries.size} games" else "").filter { it.isNotEmpty() }.joinToString(" · "),
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis,
-            )
+            if (game == null) {
+                Text(
+                    listOf(methods, "${entries.size} games").filter { it.isNotEmpty() }.joinToString(" · "),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                )
+            } else {
+                // One game picked: show each way to meet it, with its own rate, levels and conditions.
+                val slots = entries.flatMap { it.slots }
+                if (slots.isEmpty()) {
+                    Text(methods, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                } else {
+                    slots.forEach { slot ->
+                        Text(
+                            Places.slotSummary(slot),
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        )
+                    }
+                }
+            }
         }
         Column(horizontalAlignment = Alignment.End) {
             Text(Places.levelRange(min, max), style = MaterialTheme.typography.labelLarge)

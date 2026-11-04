@@ -50,6 +50,22 @@ data class PokemonDto(
     val sprites: SpritesDto = SpritesDto(),
     val species: NamedRefDto? = null,
     val cries: CriesDto? = null,
+    @SerialName("held_items") val heldItems: List<PokemonHeldItemDto> = emptyList(),
+)
+
+@Serializable
+data class PokemonHeldItemDto(
+    val item: NamedRefDto,
+    @SerialName("version_details") val versionDetails: List<HeldVersionDto> = emptyList(),
+)
+
+@Serializable
+data class HeldVersionDto(val rarity: Int = 0, val version: NamedRefDto)
+
+@Serializable
+data class ItemHeldByDto(
+    val pokemon: NamedRefDto,
+    @SerialName("version_details") val versionDetails: List<HeldVersionDto> = emptyList(),
 )
 
 @Serializable
@@ -113,6 +129,7 @@ data class SpeciesDto(
     @SerialName("is_mythical") val isMythical: Boolean = false,
     @SerialName("gender_rate") val genderRate: Int = -1,
     @SerialName("capture_rate") val captureRate: Int? = null,
+    @SerialName("growth_rate") val growthRate: NamedRefDto? = null,
     @SerialName("base_happiness") val baseHappiness: Int? = null,
     @SerialName("hatch_counter") val hatchCounter: Int? = null,
     @SerialName("egg_groups") val eggGroups: List<NamedRefDto> = emptyList(),
@@ -245,10 +262,39 @@ data class ItemDto(
     @SerialName("effect_entries") val effectEntries: List<LanguageTextDto> = emptyList(),
     @SerialName("flavor_text_entries") val flavorTextEntries: List<LanguageTextDto> = emptyList(),
     val sprites: ItemSpritesDto = ItemSpritesDto(),
+    @SerialName("held_by_pokemon") val heldByPokemon: List<ItemHeldByDto> = emptyList(),
 )
 
 @Serializable
 data class ItemSpritesDto(val default: String? = null)
+
+@Serializable
+data class ItemCategoryDto(
+    val id: Int,
+    val name: String,
+    val items: List<NamedRefDto> = emptyList(),
+)
+
+// ---- Berries ---------------------------------------------------------------------------------
+
+@Serializable
+data class BerryDto(
+    val id: Int,
+    val name: String,
+    @SerialName("growth_time") val growthTime: Int = 0,
+    @SerialName("max_harvest") val maxHarvest: Int = 0,
+    @SerialName("natural_gift_power") val naturalGiftPower: Int = 0,
+    val size: Int = 0,
+    val smoothness: Int = 0,
+    @SerialName("soil_dryness") val soilDryness: Int = 0,
+    val firmness: NamedRefDto? = null,
+    val flavors: List<BerryFlavorDto> = emptyList(),
+    val item: NamedRefDto? = null,
+    @SerialName("natural_gift_type") val naturalGiftType: NamedRefDto? = null,
+)
+
+@Serializable
+data class BerryFlavorDto(val potency: Int = 0, val flavor: NamedRefDto)
 
 // ---- Generations, regions, pokédexes, versions -----------------------------------------------
 

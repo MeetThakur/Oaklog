@@ -112,9 +112,10 @@ class ResourceCache @Inject constructor(
     companion object {
         /**
          * Bump whenever a DTO gains a field the app reads. Version 2: location lists on regions,
-         * cries and female sprites on Pokémon.
+         * cries and female sprites on Pokémon. Version 3: growth rate on species, and berries.
+         * Version 4: held items on Pokémon and on items.
          */
-        const val SCHEMA_VERSION = 2
+        const val SCHEMA_VERSION = 4
         const val DAY_MS = 24L * 60 * 60 * 1000
         const val DETAIL_TTL_MS = 30 * DAY_MS
         const val LIST_TTL_MS = 7 * DAY_MS

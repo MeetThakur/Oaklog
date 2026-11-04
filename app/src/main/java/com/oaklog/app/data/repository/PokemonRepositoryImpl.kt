@@ -169,6 +169,9 @@ class PokemonRepositoryImpl @Inject constructor(
         const val HYDRATION_BATCH = 24
         const val PLACES_CONCURRENCY = 4
 
+        /** Item categories PokéAPI files Poké Balls under, in the order the screen groups them. */
+        val BALL_CATEGORIES = listOf("standard-balls", "special-balls", "apricorn-balls")
+
         /** PokéAPI numbers alternate forms from 10001, so anything below is a species. */
         const val MAX_SPECIES_ID = 9999
     }
@@ -270,6 +273,7 @@ class PokemonRepositoryImpl @Inject constructor(
                 stats = stats,
                 baseExperience = pokemonDto.baseExperience,
                 captureRate = speciesDto.captureRate,
+                growthRate = speciesDto.growthRate?.name,
                 femaleEighths = femaleRatio,
                 eggGroups = speciesDto.eggGroups.map { it.name },
                 generation = NameFormatter.generationFromSlug(speciesDto.generation?.name) ?: generationForId(speciesDto.id),
@@ -285,6 +289,7 @@ class PokemonRepositoryImpl @Inject constructor(
                 dexEntries = dexEntries,
                 evolutionChainId = speciesDto.evolutionChain?.url?.trimEnd('/')?.substringAfterLast('/')?.toIntOrNull(),
                 criesUrl = pokemonDto.cries?.latest ?: pokemonDto.cries?.legacy,
+                heldItems = HeldMapper.heldItems(pokemonDto.heldItems),
                 femaleSpriteUrl = pokemonDto.sprites.frontFemale,
                 shinyFemaleSpriteUrl = pokemonDto.sprites.frontShinyFemale,
             )
@@ -441,7 +446,32 @@ class PokemonRepositoryImpl @Inject constructor(
                 description = desc?.let { NameFormatter.cleanFlavor(it) },
                 spriteUrl = dto.sprites.default,
                 attributes = dto.attributes.map { it.name },
+                effect = dto.effectEntries.firstOrNull { it.language?.name == "en" }?.shortEffect
+                    ?.let { NameFormatter.cleanFlavor(it) },
+                heldBy = HeldMapper.heldBy(dto.heldByPokemon),
             )
+        }
+    }
+
+    private val ballsLock = Mutex()
+    private var balls: List<ItemInfo>? = null
+
+    override suspend fun getBalls(): Result<List<ItemInfo>> = withContext(Dispatchers.IO) {
+        runCatching {
+            balls?.let { return@runCatching it }
+            ballsLock.withLock {
+                balls?.let { return@runCatching it }
+                val gate = Semaphore(HYDRATION_CONCURRENCY)
+                val loaded = coroutineScope {
+                    BALL_CATEGORIES.flatMap { category ->
+                        cache.get("item_category_$category", ItemCategoryDto.serializer()) { api.itemCategory(category) }
+                            .items
+                    }.map { ref ->
+                        async { gate.withPermit { getItem(ref.name).getOrThrow() } }
+                    }.awaitAll()
+                }
+                loaded.also { balls = it }
+            }
         }
     }
 
@@ -543,6 +573,35 @@ class PokemonRepositoryImpl @Inject constructor(
             AreaMapper.spawns(dto.pokemonEncounters)
         }
     }
+
+    private val berriesLock = Mutex()
+    private var berries: List<BerryInfo>? = null
+
+    override suspend fun getBerries(onProgress: (done: Int, total: Int) -> Unit): Result<List<BerryInfo>> =
+        withContext(Dispatchers.IO) {
+            runCatching {
+                berries?.let { return@runCatching it }
+                berriesLock.withLock {
+                    berries?.let { return@runCatching it }
+                    val list = cache.get("berry_list", ResourceListDto.serializer()) { api.berryList(limit = 100) }
+                    val gate = Semaphore(HYDRATION_CONCURRENCY)
+                    val done = java.util.concurrent.atomic.AtomicInteger()
+                    onProgress(0, list.results.size)
+                    val loaded = coroutineScope {
+                        list.results.map { ref ->
+                            async {
+                                gate.withPermit {
+                                    val dto = cache.get("berry_${ref.name}", BerryDto.serializer()) { api.berry(ref.name) }
+                                    onProgress(done.incrementAndGet(), list.results.size)
+                                    BerryMapper.info(dto)
+                                }
+                            }
+                        }.awaitAll()
+                    }
+                    loaded.sortedBy { it.id }.also { berries = it }
+                }
+            }
+        }
 
     private val placesGate = Semaphore(PLACES_CONCURRENCY)
 

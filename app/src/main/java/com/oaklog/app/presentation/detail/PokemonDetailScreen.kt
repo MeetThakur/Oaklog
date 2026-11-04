@@ -33,6 +33,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil3.compose.AsyncImage
 import com.oaklog.app.domain.logic.NameFormatter
+import com.oaklog.app.domain.logic.TypeMatchups
 import androidx.compose.foundation.layout.offset
 import androidx.compose.ui.zIndex
 import com.oaklog.app.presentation.theme.SheetShape
@@ -282,6 +283,10 @@ fun PokemonDetailScreen(
                             onSelectDexVersion = viewModel::selectDexVersion,
                             abilityInfo = state.abilityInfo,
                             onAbilityClick = { reference = ReferenceTarget.Ability(it) },
+                            onItemClick = { reference = ReferenceTarget.Item(it) },
+                            matchups = state.typeChart?.let { chart ->
+                                remember(detail.types, chart) { TypeMatchups.of(chart, detail.types) }
+                            },
                         )
                         1 -> StatsTab(detail = detail)
                         2 -> MovesTab(

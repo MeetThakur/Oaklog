@@ -1,6 +1,7 @@
 package com.oaklog.app.domain.logic
 
 import com.oaklog.app.domain.model.AreaSpawn
+import com.oaklog.app.domain.model.EncounterSlot
 import com.oaklog.app.domain.model.GameSummary
 import com.oaklog.app.domain.model.LocationSummary
 import com.oaklog.app.domain.model.SummaryMon
@@ -53,6 +54,45 @@ object Places {
             maxLevel = entries.maxOfOrNull { it.maxLevel } ?: 0,
         )
     }
+
+    /** "surf" → "Surfing". Methods without a friendlier name fall back to the prettified slug. */
+    fun methodLabel(method: String): String = when (method) {
+        "walk" -> "Walking"
+        "surf" -> "Surfing"
+        "old-rod" -> "Old rod"
+        "good-rod" -> "Good rod"
+        "super-rod" -> "Super rod"
+        "only-one" -> "Static encounter"
+        "gift" -> "Gift"
+        else -> NameFormatter.pretty(method).replaceFirstChar { it.uppercase() }
+    }
+
+    /**
+     * Conditions come as "group-value" slugs: "time-night", "swarm-yes", "radar-on", "slot2-sapphire".
+     * Turn the common ones into plain words and leave unknown ones readable rather than wrong.
+     */
+    fun conditionLabel(slug: String): String {
+        val group = slug.substringBefore('-')
+        val value = slug.substringAfter('-', "")
+        return when {
+            group == "time" -> NameFormatter.pretty(value)
+            group == "season" -> NameFormatter.pretty(value)
+            group == "swarm" -> if (value == "yes") "Swarm" else "No swarm"
+            group == "radar" -> if (value == "on") "PokéRadar" else "No PokéRadar"
+            group == "radio" -> if (value == "off") "Radio off" else "${NameFormatter.pretty(value)} radio"
+            group == "story" -> NameFormatter.pretty(value)
+            group.startsWith("slot") && value.isNotEmpty() -> "${NameFormatter.pretty(value)} in slot ${group.removePrefix("slot")}"
+            else -> NameFormatter.pretty(slug)
+        }
+    }
+
+    /** "Surfing · 20% · Lv 20–30 · Night" */
+    fun slotSummary(slot: EncounterSlot): String = buildList {
+        add(methodLabel(slot.method))
+        if (slot.chance > 0) add("${slot.chance}%")
+        if (slot.maxLevel > 0) add(levelRange(slot.minLevel, slot.maxLevel))
+        slot.conditions.forEach { add(conditionLabel(it)) }
+    }.joinToString(" · ")
 
     fun levelRange(min: Int, max: Int): String = when {
         max <= 0 -> "—"

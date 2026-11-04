@@ -58,6 +58,15 @@ interface PokeApiService {
     @GET("region")
     suspend fun regionList(@Query("limit") limit: Int = 100): ResourceListDto
 
+    @GET("item-category/{id}")
+    suspend fun itemCategory(@Path("id") idOrName: String): ItemCategoryDto
+
+    @GET("berry")
+    suspend fun berryList(@Query("limit") limit: Int = 100, @Query("offset") offset: Int = 0): ResourceListDto
+
+    @GET("berry/{id}")
+    suspend fun berry(@Path("id") idOrName: String): BerryDto
+
     @GET("location/{id}")
     suspend fun location(@Path("id") idOrName: String): LocationDto
 

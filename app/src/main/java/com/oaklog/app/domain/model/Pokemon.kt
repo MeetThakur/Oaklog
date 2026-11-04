@@ -49,6 +49,8 @@ data class PokemonDetail(
     val stats: List<Stat>,
     val baseExperience: Int?,
     val captureRate: Int?,
+    /** PokéAPI growth-rate slug, e.g. "medium-slow". */
+    val growthRate: String? = null,
     /** Female share in eighths, or null for genderless. */
     val femaleEighths: Int?,
     val eggGroups: List<String>,
@@ -64,6 +66,8 @@ data class PokemonDetail(
     val evolutionChainId: Int?,
     /** Audio clip URL (Ogg), or null when PokéAPI has none for this form. */
     val criesUrl: String? = null,
+    /** Items wild specimens may hold, with the chance per game. */
+    val heldItems: List<HeldItem> = emptyList(),
     /** Present only when the female looks different from the male. */
     val femaleSpriteUrl: String? = null,
     val shinyFemaleSpriteUrl: String? = null,
@@ -156,7 +160,20 @@ data class ItemInfo(
     val description: String?,
     val spriteUrl: String?,
     val attributes: List<String>,
+    /** One-sentence effect, e.g. "Success rate is 1.5×." Null when PokéAPI has none. */
+    val effect: String? = null,
+    /** Wild Pokémon that can be found holding this item. */
+    val heldBy: List<HeldBy> = emptyList(),
 )
+
+/** The chance, in percent, that a wild Pokémon holds an item in one game. */
+data class HeldRarity(val version: String, val percent: Int)
+
+/** A wild Pokémon carrying [item] in the games listed in [entries]. */
+data class HeldItem(val item: String, val entries: List<HeldRarity>)
+
+/** Reverse view for an item: [pokemonName] holds it. [speciesId] is null for alternate forms. */
+data class HeldBy(val pokemonName: String, val speciesId: Int?, val entries: List<HeldRarity>)
 
 data class GenerationInfo(val id: Int, val name: String, val region: String?, val versionGroups: List<String>)
 
@@ -187,6 +204,29 @@ data class EncounterSpot(
 
 data class EncounterGroup(val version: String, val spots: List<EncounterSpot>)
 
+// ---- Berries ---------------------------------------------------------------------------------
+
+data class BerryFlavor(val name: String, val potency: Int)
+
+data class BerryInfo(
+    val id: Int,
+    val name: String,
+    /** Hours per growth stage, as PokéAPI reports it; total time to ripen is four stages. */
+    val growthTime: Int,
+    val maxHarvest: Int,
+    val naturalGiftPower: Int,
+    val naturalGiftType: String?,
+    /** Size in millimetres. */
+    val size: Int,
+    val smoothness: Int,
+    val soilDryness: Int,
+    val firmness: String?,
+    /** Only flavors with potency above zero. */
+    val flavors: List<BerryFlavor>,
+    /** Item slug for the sprite, e.g. "cheri-berry". */
+    val itemName: String,
+)
+
 // ---- Places ----------------------------------------------------------------------------------
 
 /** How one game offers a Pokémon in an area. */
@@ -197,6 +237,20 @@ data class SpawnEntry(
     /** Highest chance across the area's encounter slots, in percent. */
     val chance: Int,
     val methods: List<String>,
+    /** The same encounters split by method and condition, each with its own rate. */
+    val slots: List<EncounterSlot> = emptyList(),
+)
+
+/**
+ * One way to meet a Pokémon: [method] under [conditions] (time of day, swarm, radar, …), with the
+ * [chance] of it being the one that appears. Slots of the same method add up.
+ */
+data class EncounterSlot(
+    val method: String,
+    val chance: Int,
+    val minLevel: Int,
+    val maxLevel: Int,
+    val conditions: List<String>,
 )
 
 /** A Pokémon seen somewhere in a location. [id] is null for alternate forms, which have no art here. */

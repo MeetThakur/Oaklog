@@ -5,6 +5,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.oaklog.app.data.prefs.SettingsDataStore
 import com.oaklog.app.domain.logic.Learnset
+import com.oaklog.app.domain.logic.TypeChart
 import com.oaklog.app.domain.model.*
 import com.oaklog.app.domain.repository.CollectionRepository
 import com.oaklog.app.domain.repository.PokemonRepository
@@ -24,6 +25,7 @@ data class PokemonDetailUiState(
     val collectionEntry: CollectionEntry? = null,
     val selectedVarietyName: String? = null,
     val isShiny: Boolean = false,
+    val typeChart: TypeChart? = null,
     val isFemale: Boolean = false,
     val selectedDexVersion: String? = null,
     val selectedEncounterVersion: String? = null,
@@ -52,6 +54,10 @@ class PokemonDetailViewModel @Inject constructor(
     init {
         loadDetail(pokemonIdArg)
         observeCollection()
+        // Needed for the matchup card; if it can't load the card simply doesn't appear.
+        viewModelScope.launch(Dispatchers.IO) {
+            pokemonRepo.getTypeChart().onSuccess { chart -> _uiState.update { it.copy(typeChart = chart) } }
+        }
     }
 
     private fun observeCollection() {

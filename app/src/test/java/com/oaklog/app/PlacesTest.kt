@@ -122,3 +122,48 @@ class PerGameSummaryTest {
         assertEquals(null, s.forGame("gold"))
     }
 }
+
+class EncounterSlotTest {
+    private fun detail(method: String, chance: Int, min: Int, max: Int, vararg conditions: String) =
+        com.oaklog.app.data.remote.dto.EncounterDetailDto(
+            chance = chance, minLevel = min, maxLevel = max,
+            method = com.oaklog.app.data.remote.dto.NamedRefDto(method),
+            conditionValues = conditions.map { com.oaklog.app.data.remote.dto.NamedRefDto(it) },
+        )
+
+    @Test
+    fun `slots of one method and condition add their rates`() {
+        val slots = AreaMapper.slots(
+            listOf(detail("walk", 20, 5, 6), detail("walk", 10, 4, 7), detail("surf", 60, 20, 30)),
+        )
+        assertEquals(listOf("surf", "walk"), slots.map { it.method })
+        val walk = slots.first { it.method == "walk" }
+        assertEquals(30, walk.chance)
+        assertEquals(4, walk.minLevel)
+        assertEquals(7, walk.maxLevel)
+    }
+
+    @Test
+    fun `different conditions stay separate slots`() {
+        val slots = AreaMapper.slots(
+            listOf(detail("walk", 20, 5, 6, "time-morning"), detail("walk", 20, 5, 6, "time-night")),
+        )
+        assertEquals(2, slots.size)
+    }
+
+    @Test
+    fun `labels read as plain words`() {
+        assertEquals("Surfing", Places.methodLabel("surf"))
+        assertEquals("Old rod", Places.methodLabel("old-rod"))
+        assertEquals("Night", Places.conditionLabel("time-night"))
+        assertEquals("Swarm", Places.conditionLabel("swarm-yes"))
+        assertEquals("PokéRadar", Places.conditionLabel("radar-on"))
+        assertEquals("Sapphire in slot 2", Places.conditionLabel("slot2-sapphire"))
+    }
+
+    @Test
+    fun `summary joins method rate levels and conditions`() {
+        val s = Places.slotSummary(com.oaklog.app.domain.model.EncounterSlot("surf", 20, 20, 30, listOf("time-night")))
+        assertEquals("Surfing · 20% · Lv 20–30 · Night", s)
+    }
+}

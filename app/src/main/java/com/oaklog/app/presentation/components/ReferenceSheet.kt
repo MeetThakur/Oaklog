@@ -36,6 +36,7 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.ViewModel
 import coil3.compose.AsyncImage
+import com.oaklog.app.domain.logic.HeldItems
 import com.oaklog.app.domain.logic.NameFormatter
 import com.oaklog.app.domain.model.AbilityInfo
 import com.oaklog.app.domain.model.ItemInfo
@@ -122,7 +123,7 @@ fun ReferenceSheet(
                 is Loaded.Ready -> when (val v = state.value) {
                     is MoveInfo -> MoveBody(v, onOpenPokemon, onDismiss)
                     is AbilityInfo -> AbilityBody(v, onOpenPokemon, onDismiss)
-                    is ItemInfo -> ItemBody(v)
+                    is ItemInfo -> ItemBody(v, onOpenPokemon, onDismiss)
                 }
             }
         }
@@ -192,7 +193,7 @@ private fun AbilityBody(info: AbilityInfo, onOpenPokemon: (Int) -> Unit, onDismi
 
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
-private fun ItemBody(info: ItemInfo) {
+private fun ItemBody(info: ItemInfo, onOpenPokemon: (Int) -> Unit, onDismiss: () -> Unit) {
     Row(horizontalArrangement = Arrangement.spacedBy(12.dp), verticalAlignment = Alignment.CenterVertically) {
         info.spriteUrl?.let { AsyncImage(model = it, contentDescription = null, modifier = Modifier.height(48.dp)) }
         Column {
@@ -204,6 +205,26 @@ private fun ItemBody(info: ItemInfo) {
     if (info.attributes.isNotEmpty()) {
         FlowRow(horizontalArrangement = Arrangement.spacedBy(6.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
             info.attributes.forEach { Label(NameFormatter.pretty(it)) }
+        }
+    }
+    val holders = info.heldBy.filter { it.speciesId != null }
+    if (holders.isNotEmpty()) {
+        Section("Held by ${holders.size} wild Pokémon")
+        var showAll by remember { mutableStateOf(false) }
+        val shown = if (showAll) holders else holders.take(CHIP_LIMIT)
+        FlowRow(horizontalArrangement = Arrangement.spacedBy(6.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
+            shown.forEach { p ->
+                val chance = HeldItems.rarityLabel(p.entries, null)
+                PokemonChip(NameFormatter.pretty(p.pokemonName) + (chance?.let { " · $it" } ?: "")) {
+                    onDismiss()
+                    onOpenPokemon(p.speciesId!!)
+                }
+            }
+        }
+        if (holders.size > CHIP_LIMIT) {
+            TextButton(onClick = { showAll = !showAll }) {
+                Text(if (showAll) "Show fewer" else "Show all ${holders.size}")
+            }
         }
     }
 }

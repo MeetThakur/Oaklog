@@ -41,6 +41,11 @@ interface PokemonRepository {
     suspend fun getAreaSpawns(area: String): Result<List<AreaSpawn>>
 
     /** Every area of [location] folded into one summary. Cached, but costs one request per area. */
+    /** Every Poké Ball item, grouped in category order. Cached in memory after the first call. */
+    suspend fun getBalls(): Result<List<ItemInfo>>
+
+    suspend fun getBerries(onProgress: (done: Int, total: Int) -> Unit): Result<List<BerryInfo>>
+
     suspend fun getLocationSummary(location: String): Result<LocationSummary>
     suspend fun getGenerations(): Result<List<GenerationInfo>>
     suspend fun getGameVersions(): Result<List<GameVersion>>
