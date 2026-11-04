@@ -267,7 +267,29 @@ data class RegionDto(
     val name: String,
     @SerialName("main_generation") val mainGeneration: NamedRefDto? = null,
     val pokedexes: List<NamedRefDto> = emptyList(),
+    val locations: List<NamedRefDto> = emptyList(),
     @SerialName("version_groups") val versionGroups: List<NamedRefDto> = emptyList(),
+)
+
+@Serializable
+data class LocationDto(
+    val id: Int,
+    val name: String,
+    val region: NamedRefDto? = null,
+    val areas: List<NamedRefDto> = emptyList(),
+)
+
+@Serializable
+data class LocationAreaDto(
+    val id: Int,
+    val name: String,
+    @SerialName("pokemon_encounters") val pokemonEncounters: List<AreaPokemonEncounterDto> = emptyList(),
+)
+
+@Serializable
+data class AreaPokemonEncounterDto(
+    val pokemon: NamedRefDto,
+    @SerialName("version_details") val versionDetails: List<EncounterVersionDetailDto> = emptyList(),
 )
 
 @Serializable

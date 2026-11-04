@@ -31,6 +31,15 @@ sealed class Screen(val route: String) {
     data object AbilitiesDatabase : Screen("explore/abilities")
     data object ItemsDatabase : Screen("explore/items")
     data object Regions : Screen("explore/regions")
+    data object EvolutionFinder : Screen("explore/evolutions")
+
+    data object RegionPlaces : Screen("explore/region/{name}") {
+        fun createRoute(name: String) = "explore/region/$name"
+    }
+
+    data object LocationDetail : Screen("explore/location/{name}") {
+        fun createRoute(name: String) = "explore/location/$name"
+    }
     data object Settings : Screen("settings")
     data object Search : Screen("search")
     data object Calculator : Screen("explore/calculator")

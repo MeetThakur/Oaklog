@@ -24,6 +24,7 @@ import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.Semaphore
+import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.sync.withPermit
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.builtins.ListSerializer
@@ -288,6 +289,50 @@ class PokemonRepositoryImpl @Inject constructor(
         }
     }
 
+    private val evolutionStepsLock = Mutex()
+    private var evolutionSteps: List<EvolutionStep>? = null
+
+    override suspend fun getEvolutionSteps(
+        onProgress: (done: Int, total: Int) -> Unit,
+    ): Result<List<EvolutionStep>> = withContext(Dispatchers.IO) {
+        runCatching {
+            evolutionSteps?.let { return@runCatching it }
+            evolutionStepsLock.withLock {
+                evolutionSteps?.let { return@runCatching it }
+                val list = cache.get("evolution_chain_list", ResourceListDto.serializer()) {
+                    api.evolutionChainList(limit = 1000)
+                }
+                val ids = list.results.mapNotNull { it.id }
+                val gate = Semaphore(HYDRATION_CONCURRENCY)
+                var done = 0
+                val failed = java.util.concurrent.atomic.AtomicInteger()
+                onProgress(0, ids.size)
+                val steps = ids.chunked(HYDRATION_BATCH).flatMap { batch ->
+                    val rows = coroutineScope {
+                        batch.map { id ->
+                            async {
+                                gate.withPermit {
+                                    runCatching {
+                                        val dto = cache.get("evolution_chain_$id", EvolutionChainDto.serializer()) {
+                                            api.evolutionChain(id)
+                                        }
+                                        EvolutionMapper.steps(dto.chain)
+                                    }.onFailure { failed.incrementAndGet() }.getOrDefault(emptyList())
+                                }
+                            }
+                        }.awaitAll()
+                    }
+                    done += batch.size
+                    onProgress(done, ids.size)
+                    rows.flatten()
+                }
+                // A partial index would silently hide evolutions, so only keep a complete one.
+                if (failed.get() > 0) throw java.io.IOException("${failed.get()} evolution chains failed to load")
+                steps.also { evolutionSteps = it }
+            }
+        }
+    }
+
     override suspend fun getEvolutionChain(chainId: Int): Result<EvolutionNode> = withContext(Dispatchers.IO) {
         runCatching {
             val dto = cache.get("evolution_chain_$chainId", EvolutionChainDto.serializer()) {
@@ -310,25 +355,7 @@ class PokemonRepositoryImpl @Inject constructor(
         )
     }
 
-    private fun formatEvolutionRequirement(d: EvolutionDetailDto): String {
-        val parts = mutableListOf<String>()
-        if (d.minLevel != null) parts.add("Level ${d.minLevel}")
-        if (d.item != null) parts.add("Use ${NameFormatter.pretty(d.item.name)}")
-        if (d.minHappiness != null) parts.add("Happiness ${d.minHappiness}+")
-        if (d.heldItem != null) parts.add("Hold ${NameFormatter.pretty(d.heldItem.name)}")
-        if (d.knownMove != null) parts.add("Knows ${NameFormatter.pretty(d.knownMove.name)}")
-        if (d.timeOfDay != null && d.timeOfDay.isNotBlank()) parts.add(d.timeOfDay.replaceFirstChar { it.uppercase() })
-        if (d.location != null) parts.add("at ${NameFormatter.pretty(d.location.name)}")
-        if (d.needsOverworldRain) parts.add("During Rain")
-        if (d.turnUpsideDown) parts.add("Turn Device Upside Down")
-        if (d.tradeSpecies != null) parts.add("Trade with ${NameFormatter.pretty(d.tradeSpecies.name)}")
-        if (d.trigger?.name == "trade" && d.heldItem == null && d.tradeSpecies == null) parts.add("Trade")
-        if (parts.isEmpty()) {
-            val trig = d.trigger?.name ?: "Level Up"
-            parts.add(NameFormatter.pretty(trig))
-        }
-        return parts.joinToString(", ")
-    }
+    private fun formatEvolutionRequirement(d: EvolutionDetailDto): String = EvolutionMapper.requirement(d)
 
     override suspend fun getMove(nameOrId: String): Result<MoveInfo> = withContext(Dispatchers.IO) {
         runCatching {
@@ -491,6 +518,27 @@ class PokemonRepositoryImpl @Inject constructor(
                     generation = NameFormatter.generationFromSlug(r.mainGeneration?.name),
                 )
             }
+        }
+    }
+
+    override suspend fun getRegionLocations(region: String): Result<List<NamedEntry>> = withContext(Dispatchers.IO) {
+        runCatching {
+            val dto = cache.get("region_$region", RegionDto.serializer()) { api.region(region) }
+            dto.locations.mapNotNull { ref -> ref.id?.let { NamedEntry(it, ref.name) } }
+        }
+    }
+
+    override suspend fun getLocationAreas(location: String): Result<List<NamedEntry>> = withContext(Dispatchers.IO) {
+        runCatching {
+            val dto = cache.get("location_$location", LocationDto.serializer()) { api.location(location) }
+            dto.areas.mapNotNull { ref -> ref.id?.let { NamedEntry(it, ref.name) } }
+        }
+    }
+
+    override suspend fun getAreaSpawns(area: String): Result<List<AreaSpawn>> = withContext(Dispatchers.IO) {
+        runCatching {
+            val dto = cache.get("location_area_$area", LocationAreaDto.serializer()) { api.locationArea(area) }
+            AreaMapper.spawns(dto.pokemonEncounters)
         }
     }
 

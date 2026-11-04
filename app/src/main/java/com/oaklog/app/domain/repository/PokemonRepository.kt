@@ -23,6 +23,12 @@ interface PokemonRepository {
     suspend fun getPokemonDetail(speciesIdOrName: String, varietyName: String? = null): Result<PokemonDetail>
     suspend fun getLearnset(pokemonName: String): Result<List<LearnEntry>>
     suspend fun getEvolutionChain(chainId: Int): Result<EvolutionNode>
+
+    /**
+     * Every evolution in the games, flattened. First call fetches all chains (cached afterwards) and
+     * reports progress; later calls return from memory.
+     */
+    suspend fun getEvolutionSteps(onProgress: (done: Int, total: Int) -> Unit): Result<List<EvolutionStep>>
     suspend fun getMove(nameOrId: String): Result<MoveInfo>
     suspend fun getAbility(nameOrId: String): Result<AbilityInfo>
     suspend fun getItem(nameOrId: String): Result<ItemInfo>
@@ -30,6 +36,9 @@ interface PokemonRepository {
     suspend fun getPokedex(slug: String): Result<PokedexInfo>
     suspend fun getPokedexList(): Result<List<NamedEntry>>
     suspend fun getRegions(): Result<List<RegionInfo>>
+    suspend fun getRegionLocations(region: String): Result<List<NamedEntry>>
+    suspend fun getLocationAreas(location: String): Result<List<NamedEntry>>
+    suspend fun getAreaSpawns(area: String): Result<List<AreaSpawn>>
     suspend fun getGenerations(): Result<List<GenerationInfo>>
     suspend fun getGameVersions(): Result<List<GameVersion>>
     suspend fun getTypeChart(): Result<TypeChart>

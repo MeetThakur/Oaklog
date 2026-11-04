@@ -19,6 +19,9 @@ interface PokeApiService {
     @GET("pokemon/{id}/encounters")
     suspend fun encounters(@Path("id") idOrName: String): List<LocationAreaEncounterDto>
 
+    @GET("evolution-chain")
+    suspend fun evolutionChainList(@Query("limit") limit: Int = 1000, @Query("offset") offset: Int = 0): ResourceListDto
+
     @GET("evolution-chain/{id}")
     suspend fun evolutionChain(@Path("id") id: Int): EvolutionChainDto
 
@@ -54,6 +57,12 @@ interface PokeApiService {
 
     @GET("region")
     suspend fun regionList(@Query("limit") limit: Int = 100): ResourceListDto
+
+    @GET("location/{id}")
+    suspend fun location(@Path("id") idOrName: String): LocationDto
+
+    @GET("location-area/{id}")
+    suspend fun locationArea(@Path("id") idOrName: String): LocationAreaDto
 
     @GET("region/{id}")
     suspend fun region(@Path("id") idOrName: String): RegionDto

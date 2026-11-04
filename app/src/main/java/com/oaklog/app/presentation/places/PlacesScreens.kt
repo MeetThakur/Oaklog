@@ -1,0 +1,335 @@
+package com.oaklog.app.presentation.places
+
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
+import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.ExpandLess
+import androidx.compose.material.icons.filled.ExpandMore
+import androidx.compose.material.icons.filled.Search
+import androidx.compose.material.icons.outlined.Place
+import androidx.compose.material.icons.outlined.SearchOff
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.OutlinedTextFieldDefaults
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.runtime.collectAsState
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.dp
+import coil3.compose.AsyncImage
+import com.oaklog.app.domain.logic.NameFormatter
+import com.oaklog.app.domain.logic.Places
+import com.oaklog.app.domain.model.AreaSpawn
+import com.oaklog.app.domain.model.SpawnEntry
+import com.oaklog.app.presentation.components.DropdownOption
+import com.oaklog.app.presentation.components.EmptyView
+import com.oaklog.app.presentation.components.ErrorView
+import com.oaklog.app.presentation.components.LoadingView
+import com.oaklog.app.presentation.components.OakDropdown
+import com.oaklog.app.presentation.components.OakTopBar
+import com.oaklog.app.presentation.theme.CardShape
+import com.oaklog.app.presentation.theme.ChipShape
+
+/** Every location in a region, searchable. */
+@Composable
+fun RegionPlacesScreen(
+    viewModel: RegionPlacesViewModel,
+    onNavigateBack: () -> Unit,
+    onLocationClick: (String) -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    val state by viewModel.state.collectAsState()
+    var query by remember { mutableStateOf("") }
+    val region = viewModel.region
+    val shown = remember(state.locations, query) {
+        val q = query.trim().lowercase().replace('-', ' ')
+        if (q.isEmpty()) state.locations
+        else state.locations.filter { it.name.replace('-', ' ').contains(q) }
+    }
+
+    Scaffold(
+        topBar = { OakTopBar(title = NameFormatter.pretty(region), canNavigateBack = true, onNavigateBack = onNavigateBack) },
+        modifier = modifier,
+    ) { inner ->
+        Column(Modifier.fillMaxSize().padding(inner)) {
+            when {
+                state.isLoading -> LoadingView(message = "Loading places...")
+                state.failed -> ErrorView(message = "Couldn't load this region's places.", onRetry = viewModel::load)
+                state.locations.isEmpty() -> EmptyView(
+                    title = "No places listed",
+                    subtitle = "PokéAPI has no locations recorded for this region.",
+                    icon = Icons.Outlined.Place,
+                )
+                else -> {
+                    OutlinedTextField(
+                        value = query,
+                        onValueChange = { query = it },
+                        placeholder = { Text("Search ${state.locations.size} places") },
+                        leadingIcon = { Icon(Icons.Default.Search, contentDescription = null) },
+                        trailingIcon = {
+                            if (query.isNotEmpty()) IconButton(onClick = { query = "" }) {
+                                Icon(Icons.Default.Close, contentDescription = "Clear")
+                            }
+                        },
+                        singleLine = true,
+                        shape = ChipShape,
+                        modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp),
+                        colors = OutlinedTextFieldDefaults.colors(
+                            unfocusedBorderColor = MaterialTheme.colorScheme.outline,
+                            focusedBorderColor = MaterialTheme.colorScheme.onSurface,
+                        ),
+                    )
+                    if (shown.isEmpty()) {
+                        EmptyView(
+                            title = "No place matches",
+                            subtitle = "Nothing in ${NameFormatter.pretty(region)} matches \"${query.trim()}\".",
+                            icon = Icons.Outlined.SearchOff,
+                        )
+                    } else {
+                        LazyColumn(contentPadding = PaddingValues(horizontal = 16.dp, vertical = 4.dp)) {
+                            items(shown, key = { it.id }) { place ->
+                                Row(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .clickable { onLocationClick(place.name) }
+                                        .padding(vertical = 16.dp),
+                                    verticalAlignment = Alignment.CenterVertically,
+                                ) {
+                                    Text(
+                                        Places.locationLabel(place.name, region),
+                                        style = MaterialTheme.typography.titleSmall,
+                                        modifier = Modifier.weight(1f),
+                                    )
+                                    Icon(
+                                        Icons.AutoMirrored.Filled.KeyboardArrowRight,
+                                        contentDescription = null,
+                                        tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                                    )
+                                }
+                                androidx.compose.material3.HorizontalDivider(color = MaterialTheme.colorScheme.outline)
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+/** One location: its areas, each opening to the wild Pokémon found there. */
+@Composable
+fun LocationScreen(
+    viewModel: LocationViewModel,
+    onNavigateBack: () -> Unit,
+    onPokemonClick: (Int) -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    val state by viewModel.state.collectAsState()
+    val location = viewModel.location
+    var game by remember { mutableStateOf("") }
+    val games = remember(state.areas) {
+        state.areas.flatMap { it.spawns.orEmpty() }.flatMap { it.entries }.map { it.version }.distinct().sorted()
+    }
+
+    Scaffold(
+        topBar = {
+            OakTopBar(
+                title = NameFormatter.pretty(location),
+                canNavigateBack = true,
+                onNavigateBack = onNavigateBack,
+            )
+        },
+        modifier = modifier,
+    ) { inner ->
+        when {
+            state.isLoading -> LoadingView(message = "Loading areas...", modifier = Modifier.padding(inner))
+            state.failed -> ErrorView(
+                message = "Couldn't load this location.",
+                onRetry = viewModel::load,
+                modifier = Modifier.padding(inner),
+            )
+            state.areas.isEmpty() -> EmptyView(
+                title = "No areas listed",
+                subtitle = "PokéAPI has no encounter areas for this location.",
+                icon = Icons.Outlined.Place,
+                modifier = Modifier.padding(inner),
+            )
+            else -> LazyColumn(
+                modifier = Modifier.fillMaxSize().padding(inner),
+                contentPadding = PaddingValues(16.dp),
+                verticalArrangement = Arrangement.spacedBy(12.dp),
+            ) {
+                if (games.isNotEmpty()) {
+                    item {
+                        OakDropdown(
+                            label = "Game",
+                            options = listOf(DropdownOption("", "All games")) +
+                                games.map { DropdownOption(it, NameFormatter.pretty(it)) },
+                            selected = game,
+                            onSelect = { game = it },
+                        )
+                    }
+                }
+                items(state.areas, key = { it.area.id }) { area ->
+                    AreaCard(
+                        label = Places.areaLabel(area.area.name, location),
+                        state = area,
+                        game = game.ifEmpty { null },
+                        onOpen = { viewModel.loadArea(area.area.name) },
+                        onPokemonClick = onPokemonClick,
+                    )
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun AreaCard(
+    label: String,
+    state: AreaState,
+    game: String?,
+    onOpen: () -> Unit,
+    onPokemonClick: (Int) -> Unit,
+) {
+    var expanded by remember { mutableStateOf(state.spawns != null) }
+    val spawns = state.spawns?.let { all ->
+        if (game == null) all else all.filter { s -> s.entries.any { it.version == game } }
+    }
+
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clip(CardShape)
+            .background(MaterialTheme.colorScheme.surface),
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .clickable {
+                    expanded = !expanded
+                    if (expanded) onOpen()
+                }
+                .padding(16.dp),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Column(Modifier.weight(1f)) {
+                Text(label, style = MaterialTheme.typography.titleMedium)
+                if (spawns != null) {
+                    Text(
+                        "${spawns.size} Pokémon",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                }
+            }
+            Icon(
+                if (expanded) Icons.Default.ExpandLess else Icons.Default.ExpandMore,
+                contentDescription = if (expanded) "Collapse" else "Expand",
+                tint = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+        }
+        if (expanded) {
+            when {
+                state.failed -> Note("Couldn't load this area. Collapse and open it again to retry.")
+                spawns == null -> Note("Loading…")
+                spawns.isEmpty() -> Note(
+                    if (game == null) "No wild Pokémon are recorded here."
+                    else "No wild Pokémon are recorded here for ${NameFormatter.pretty(game)}.",
+                )
+                else -> spawns.forEach { SpawnRow(it, game, onPokemonClick) }
+            }
+            Spacer(Modifier.height(8.dp))
+        }
+    }
+}
+
+@Composable
+private fun Note(text: String) = Text(
+    text = text,
+    style = MaterialTheme.typography.bodySmall,
+    color = MaterialTheme.colorScheme.onSurfaceVariant,
+    modifier = Modifier.padding(horizontal = 16.dp, vertical = 4.dp),
+)
+
+@Composable
+private fun SpawnRow(spawn: AreaSpawn, game: String?, onPokemonClick: (Int) -> Unit) {
+    // With a game picked show its numbers; otherwise summarize across games.
+    val entries: List<SpawnEntry> = if (game == null) spawn.entries else spawn.entries.filter { it.version == game }
+    val min = entries.filter { it.minLevel > 0 }.minOfOrNull { it.minLevel } ?: 0
+    val max = entries.maxOfOrNull { it.maxLevel } ?: 0
+    val chance = entries.maxOfOrNull { it.chance } ?: 0
+    val methods = entries.flatMap { it.methods }.distinct().joinToString(" · ") { NameFormatter.pretty(it) }
+    val clickable = spawn.speciesId != null
+
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .let { if (clickable) it.clickable { onPokemonClick(spawn.speciesId!!) } else it }
+            .padding(horizontal = 16.dp, vertical = 8.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(12.dp),
+    ) {
+        Box(
+            Modifier.size(48.dp).clip(CircleShape).background(MaterialTheme.colorScheme.surfaceVariant),
+            contentAlignment = Alignment.Center,
+        ) {
+            spawn.speciesId?.let { id ->
+                AsyncImage(
+                    model = "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/$id.png",
+                    contentDescription = null,
+                    modifier = Modifier.size(44.dp),
+                    contentScale = ContentScale.Fit,
+                )
+            }
+        }
+        Column(Modifier.weight(1f)) {
+            Text(
+                NameFormatter.pretty(spawn.pokemonName),
+                style = MaterialTheme.typography.titleSmall,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
+            )
+            Text(
+                listOf(methods, if (game == null) "${entries.size} games" else "").filter { it.isNotEmpty() }.joinToString(" · "),
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
+            )
+        }
+        Column(horizontalAlignment = Alignment.End) {
+            Text(Places.levelRange(min, max), style = MaterialTheme.typography.labelLarge)
+            if (chance > 0) {
+                Text("$chance%", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+            }
+        }
+    }
+}

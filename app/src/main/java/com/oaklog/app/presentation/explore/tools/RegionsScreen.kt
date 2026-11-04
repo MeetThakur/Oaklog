@@ -22,6 +22,7 @@ fun RegionsScreen(
     regions: List<RegionInfo>,
     generations: List<GenerationInfo>,
     onNavigateBack: () -> Unit,
+    onRegionClick: (String) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     Scaffold(
@@ -59,6 +60,7 @@ fun RegionsScreen(
 
             items(regions, key = { it.id }) { region ->
                 Card(
+                    onClick = { onRegionClick(region.name) },
                     shape = RoundedCornerShape(16.dp),
                     colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
                     elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
@@ -88,6 +90,12 @@ fun RegionsScreen(
                                 )
                             }
                         }
+
+                        Text(
+                            text = "Browse places and wild Pokémon",
+                            style = MaterialTheme.typography.labelLarge,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        )
 
                         if (region.pokedexes.isNotEmpty()) {
                             Text(

@@ -83,6 +83,31 @@ data class EvolutionNode(
     val children: List<EvolutionNode>,
 )
 
+/** How a species evolves, reduced to the handful of kinds a person actually filters by. */
+enum class EvoMethod(val label: String) {
+    ITEM("Use an item"),
+    LEVEL("Level up"),
+    TRADE("Trade"),
+    HAPPINESS("Friendship"),
+    HELD_ITEM("Held item"),
+    MOVE("Knows a move"),
+    LOCATION("Location"),
+    OTHER("Other"),
+}
+
+/** One evolution: [fromName] becomes [toName] by [method]. A species with two routes yields two steps. */
+data class EvolutionStep(
+    val fromId: Int,
+    val fromName: String,
+    val toId: Int,
+    val toName: String,
+    val method: EvoMethod,
+    /** The stone or held item involved, as an API slug, when there is one. */
+    val item: String?,
+    /** Full requirement in words, e.g. "Level 36, Night". */
+    val requirement: String,
+)
+
 // ---- Moves -----------------------------------------------------------------------------------
 
 data class MoveInfo(
@@ -161,3 +186,23 @@ data class EncounterSpot(
 )
 
 data class EncounterGroup(val version: String, val spots: List<EncounterSpot>)
+
+// ---- Places ----------------------------------------------------------------------------------
+
+/** How one game offers a Pokémon in an area. */
+data class SpawnEntry(
+    val version: String,
+    val minLevel: Int,
+    val maxLevel: Int,
+    /** Highest chance across the area's encounter slots, in percent. */
+    val chance: Int,
+    val methods: List<String>,
+)
+
+/** A wild Pokémon found in an area, with one entry per game that has it there. */
+data class AreaSpawn(
+    val pokemonName: String,
+    /** Null for alternate forms, which have no detail page of their own. */
+    val speciesId: Int?,
+    val entries: List<SpawnEntry>,
+)

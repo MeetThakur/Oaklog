@@ -16,6 +16,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.TrendingUp
 import androidx.compose.material.icons.automirrored.filled.CompareArrows
 import androidx.compose.material.icons.filled.AutoAwesome
 import androidx.compose.material.icons.filled.Bookmark
@@ -60,6 +61,7 @@ fun ExploreScreen(
     onNavigateToAbilities: () -> Unit,
     onNavigateToItems: () -> Unit,
     onNavigateToRegions: () -> Unit,
+    onNavigateToEvolutions: () -> Unit,
     onNavigateToCompare: () -> Unit,
     onNavigateToCalculator: () -> Unit,
     modifier: Modifier = Modifier,
@@ -72,7 +74,8 @@ fun ExploreScreen(
         Tool("Moves", "Power, accuracy, effects.", Icons.Default.AutoAwesome, "fire", onNavigateToMoves),
         Tool("Abilities", "Effects and who has them.", Icons.Default.Psychology, "grass", onNavigateToAbilities),
         Tool("Items", "Balls, berries, held items.", Icons.Default.Inventory2, "water", onNavigateToItems),
-        Tool("Regions", "Kanto to Paldea.", Icons.Default.Map, "ground", onNavigateToRegions),
+        Tool("Regions", "Places and wild Pokémon.", Icons.Default.Map, "ground", onNavigateToRegions),
+        Tool("Evolutions", "What evolves how and with what.", Icons.AutoMirrored.Filled.TrendingUp, "ghost", onNavigateToEvolutions),
     )
 
     Scaffold(

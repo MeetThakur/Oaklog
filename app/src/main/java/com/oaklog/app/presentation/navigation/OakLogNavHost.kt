@@ -32,6 +32,10 @@ import com.oaklog.app.presentation.detail.PokemonDetailViewModel
 import com.oaklog.app.presentation.explore.ExploreScreen
 import com.oaklog.app.presentation.explore.ExploreViewModel
 import com.oaklog.app.presentation.explore.tools.*
+import com.oaklog.app.presentation.places.LocationScreen
+import com.oaklog.app.presentation.places.LocationViewModel
+import com.oaklog.app.presentation.places.RegionPlacesScreen
+import com.oaklog.app.presentation.places.RegionPlacesViewModel
 import com.oaklog.app.presentation.pokedex.PokedexScreen
 import com.oaklog.app.presentation.pokedex.PokedexViewModel
 import com.oaklog.app.presentation.search.SearchScreen
@@ -129,6 +133,7 @@ fun OakLogNavHost(
                         onNavigateToAbilities = { navController.navigate(Screen.AbilitiesDatabase.route) },
                         onNavigateToItems = { navController.navigate(Screen.ItemsDatabase.route) },
                         onNavigateToRegions = { navController.navigate(Screen.Regions.route) },
+                        onNavigateToEvolutions = { navController.navigate(Screen.EvolutionFinder.route) },
                         onNavigateToCompare = { navController.navigate(Screen.Compare.createRoute()) },
                         onNavigateToCalculator = { navController.navigate(Screen.Calculator.route) },
                     )
@@ -246,6 +251,15 @@ fun OakLogNavHost(
                     )
                 }
 
+                composable(Screen.EvolutionFinder.route) {
+                    val viewModel: EvolutionFinderViewModel = hiltViewModel()
+                    EvolutionFinderScreen(
+                        viewModel = viewModel,
+                        onNavigateBack = { navController.popBackStack() },
+                        onPokemonClick = openPokemon,
+                    )
+                }
+
                 composable(Screen.Regions.route) {
                     val viewModel: ExploreViewModel = hiltViewModel()
                     val state by viewModel.uiState.collectAsState()
@@ -253,6 +267,31 @@ fun OakLogNavHost(
                         regions = state.regions,
                         generations = state.generations,
                         onNavigateBack = { navController.popBackStack() },
+                        onRegionClick = { navController.navigate(Screen.RegionPlaces.createRoute(it)) },
+                    )
+                }
+
+                composable(
+                    route = Screen.RegionPlaces.route,
+                    arguments = listOf(navArgument("name") { type = NavType.StringType }),
+                ) {
+                    val viewModel: RegionPlacesViewModel = hiltViewModel()
+                    RegionPlacesScreen(
+                        viewModel = viewModel,
+                        onNavigateBack = { navController.popBackStack() },
+                        onLocationClick = { navController.navigate(Screen.LocationDetail.createRoute(it)) },
+                    )
+                }
+
+                composable(
+                    route = Screen.LocationDetail.route,
+                    arguments = listOf(navArgument("name") { type = NavType.StringType }),
+                ) {
+                    val viewModel: LocationViewModel = hiltViewModel()
+                    LocationScreen(
+                        viewModel = viewModel,
+                        onNavigateBack = { navController.popBackStack() },
+                        onPokemonClick = openPokemon,
                     )
                 }
 
