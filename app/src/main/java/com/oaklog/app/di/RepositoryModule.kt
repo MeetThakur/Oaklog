@@ -28,3 +28,4 @@ abstract class RepositoryModule {
     @Singleton
     abstract fun bindTeamRepository(impl: TeamRepositoryImpl): TeamRepository
 }
+

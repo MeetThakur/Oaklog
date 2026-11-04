@@ -77,3 +77,4 @@ class TeamAnalyzerTest {
         assertTrue(analysis.offensiveCoverage.contains("grass"))
     }
 }
+

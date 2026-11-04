@@ -1,5 +1,6 @@
 package com.oaklog.app.presentation.teams
 
+import com.oaklog.app.presentation.components.Card
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -350,3 +351,4 @@ private fun EditMemberDialog(
         }
     )
 }
+

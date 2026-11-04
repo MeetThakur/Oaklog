@@ -1,14 +1,18 @@
 package com.oaklog.app.presentation.navigation
 
-import androidx.compose.material3.*
+import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
+import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.ShortNavigationBar
+import androidx.compose.material3.ShortNavigationBarItem
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.compose.currentBackStackEntryAsState
 
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun OakLogBottomBar(
     navController: NavController,
@@ -21,14 +25,13 @@ fun OakLogBottomBar(
     val isBottomBarVisible = bottomNavItems.any { it.screen.route == currentRoute }
     if (!isBottomBarVisible) return
 
-    NavigationBar(
+    ShortNavigationBar(
         modifier = modifier,
-        containerColor = MaterialTheme.colorScheme.surface,
-        contentColor = MaterialTheme.colorScheme.primary,
+        containerColor = MaterialTheme.colorScheme.surfaceContainer,
     ) {
         bottomNavItems.forEach { item ->
             val isSelected = currentRoute == item.screen.route
-            NavigationBarItem(
+            ShortNavigationBarItem(
                 selected = isSelected,
                 onClick = {
                     if (currentRoute != item.screen.route) {
@@ -47,20 +50,7 @@ fun OakLogBottomBar(
                         contentDescription = item.title,
                     )
                 },
-                label = {
-                    Text(
-                        text = item.title,
-                        fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium,
-                        fontSize = 12.sp,
-                    )
-                },
-                colors = NavigationBarItemDefaults.colors(
-                    indicatorColor = MaterialTheme.colorScheme.primaryContainer,
-                    selectedIconColor = MaterialTheme.colorScheme.primary,
-                    selectedTextColor = MaterialTheme.colorScheme.primary,
-                    unselectedIconColor = MaterialTheme.colorScheme.onSurfaceVariant,
-                    unselectedTextColor = MaterialTheme.colorScheme.onSurfaceVariant,
-                ),
+                label = { Text(text = item.title) },
             )
         }
     }

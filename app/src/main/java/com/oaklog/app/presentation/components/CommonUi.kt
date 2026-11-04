@@ -30,6 +30,7 @@ import com.oaklog.app.presentation.theme.OakFavoriteRed
 import com.oaklog.app.presentation.theme.OakSeenBlue
 import com.oaklog.app.presentation.theme.OakShinyGold
 
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun LoadingView(
     modifier: Modifier = Modifier,
@@ -45,10 +46,7 @@ fun LoadingView(
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.spacedBy(16.dp),
         ) {
-            CircularProgressIndicator(
-                color = MaterialTheme.colorScheme.primary,
-                strokeWidth = 3.dp,
-            )
+            LoadingIndicator(color = MaterialTheme.colorScheme.primary)
             Text(
                 text = message,
                 style = MaterialTheme.typography.bodyMedium,
@@ -146,10 +144,11 @@ fun CollectionStatusButton(
 
     Box(
         modifier = modifier
-            .clip(RoundedCornerShape(8.dp))
-            .background(color.copy(alpha = 0.15f))
+            .clip(RoundedCornerShape(10.dp))
+            .background(if (status == CollectionStatus.NOT_CAUGHT) MaterialTheme.colorScheme.surface else color.copy(alpha = 0.12f))
+            .border(1.dp, if (status == CollectionStatus.NOT_CAUGHT) MaterialTheme.colorScheme.outline else color.copy(alpha = 0.5f), RoundedCornerShape(10.dp))
             .clickable { onCycleStatus() }
-            .padding(horizontal = 8.dp, vertical = 4.dp),
+            .padding(horizontal = 10.dp, vertical = 6.dp),
         contentAlignment = Alignment.Center,
     ) {
         Row(
@@ -164,9 +163,9 @@ fun CollectionStatusButton(
             )
             Text(
                 text = text,
-                fontSize = 11.sp,
-                fontWeight = FontWeight.SemiBold,
-                color = color,
+                fontSize = 12.sp,
+                fontWeight = FontWeight.Medium,
+                color = if (status == CollectionStatus.NOT_CAUGHT) MaterialTheme.colorScheme.onSurfaceVariant else color,
             )
         }
     }
@@ -189,4 +188,56 @@ fun FavoriteIconButton(
             modifier = Modifier.size(18.dp),
         )
     }
+}
+
+
+/** Icon-only caught/seen toggle for dense lists; tap cycles status. */
+@Composable
+fun StatusDot(
+    entry: CollectionEntry?,
+    onCycleStatus: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    val status = entry?.status ?: CollectionStatus.NOT_CAUGHT
+    val (icon, color, label) = when (status) {
+        CollectionStatus.CAUGHT -> Triple(Icons.Filled.CheckCircle, OakCaughtGreen, "Caught")
+        CollectionStatus.SEEN -> Triple(Icons.Filled.Visibility, OakSeenBlue, "Seen")
+        CollectionStatus.NOT_CAUGHT -> Triple(
+            Icons.Outlined.CheckCircleOutline,
+            MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.45f),
+            "Not caught",
+        )
+    }
+    IconButton(onClick = onCycleStatus, modifier = modifier.size(32.dp)) {
+        Icon(imageVector = icon, contentDescription = label, tint = color, modifier = Modifier.size(18.dp))
+    }
+}
+
+/** Neutral filter chip: selected state is an ink fill rather than a tonal brand color. */
+@Composable
+fun OakFilterChip(
+    selected: Boolean,
+    onClick: () -> Unit,
+    label: String,
+    modifier: Modifier = Modifier,
+) {
+    FilterChip(
+        selected = selected,
+        onClick = onClick,
+        modifier = modifier,
+        label = { Text(label, fontSize = 13.sp, fontWeight = FontWeight.Medium) },
+        shape = RoundedCornerShape(12.dp),
+        colors = FilterChipDefaults.filterChipColors(
+            containerColor = MaterialTheme.colorScheme.surface,
+            labelColor = MaterialTheme.colorScheme.onSurfaceVariant,
+            selectedContainerColor = MaterialTheme.colorScheme.primaryContainer,
+            selectedLabelColor = MaterialTheme.colorScheme.onPrimaryContainer,
+        ),
+        border = FilterChipDefaults.filterChipBorder(
+            enabled = true,
+            selected = selected,
+            borderColor = MaterialTheme.colorScheme.outline,
+            selectedBorderColor = MaterialTheme.colorScheme.primaryContainer,
+        ),
+    )
 }

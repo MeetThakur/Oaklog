@@ -101,3 +101,4 @@ class CollectionViewModel @Inject constructor(
         }
     }
 }
+

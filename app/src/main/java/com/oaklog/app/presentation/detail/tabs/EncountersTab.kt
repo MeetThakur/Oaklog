@@ -1,5 +1,7 @@
 package com.oaklog.app.presentation.detail.tabs
 
+import com.oaklog.app.presentation.components.Card
+import com.oaklog.app.presentation.components.FilterChip
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
@@ -13,6 +15,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.oaklog.app.domain.logic.NameFormatter
 import com.oaklog.app.domain.model.EncounterGroup
+import com.oaklog.app.presentation.components.DropdownOption
+import com.oaklog.app.presentation.components.OakDropdown
 
 @Composable
 fun EncountersTab(
@@ -62,24 +66,16 @@ fun EncountersTab(
                     Text(
                         text = "Select Game Version",
                         style = MaterialTheme.typography.titleSmall,
-                        fontWeight = FontWeight.Bold,
-                        color = MaterialTheme.colorScheme.primary,
+                        fontWeight = FontWeight.SemiBold,
+                        color = MaterialTheme.colorScheme.onSurface,
                     )
                     Spacer(Modifier.height(10.dp))
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .horizontalScroll(rememberScrollState()),
-                        horizontalArrangement = Arrangement.spacedBy(6.dp),
-                    ) {
-                        encounters.forEach { group ->
-                            FilterChip(
-                                selected = group.version == selectedVersion,
-                                onClick = { onSelectVersion(group.version) },
-                                label = { Text(NameFormatter.pretty(group.version)) },
-                            )
-                        }
-                    }
+                    OakDropdown(
+                        label = "Game version",
+                        options = encounters.map { DropdownOption(it.version, NameFormatter.pretty(it.version)) },
+                        selected = selectedVersion,
+                        onSelect = onSelectVersion,
+                    )
                 }
             }
 
@@ -171,3 +167,4 @@ fun EncountersTab(
         }
     }
 }
+

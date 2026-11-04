@@ -39,6 +39,9 @@ interface PokemonIndexDao {
     @Query("SELECT id FROM pokemon_index WHERE baseStatTotal IS NOT NULL AND isLegendary IS NOT NULL")
     suspend fun hydratedIds(): List<Int>
 
+    @Query("SELECT id FROM pokemon_index WHERE baseStatTotal IS NULL OR isLegendary IS NULL ORDER BY id")
+    suspend fun unhydratedIds(): List<Int>
+
     @Upsert
     suspend fun upsertAll(items: List<PokemonIndexEntity>)
 

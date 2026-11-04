@@ -1,5 +1,6 @@
 package com.oaklog.app.presentation.explore
 
+import com.oaklog.app.presentation.components.Card
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
@@ -49,59 +50,40 @@ fun ExploreScreen(
                 .padding(innerPadding)
                 .verticalScroll(rememberScrollState())
                 .padding(16.dp),
-            verticalArrangement = Arrangement.spacedBy(14.dp),
+            verticalArrangement = Arrangement.spacedBy(10.dp),
         ) {
-            Text(
-                text = "Oak's Research Archives",
-                style = MaterialTheme.typography.titleLarge,
-                fontWeight = FontWeight.Bold,
-                color = MaterialTheme.colorScheme.primary,
-            )
-            Text(
-                text = "Explore the deep computational data, move registries, item inventories, and type interactions of the Pokémon world.",
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-            )
-
-            Spacer(Modifier.height(6.dp))
-
             ExploreToolCard(
                 title = "Interactive Type Chart",
-                description = "Calculate damage multipliers, weaknesses, quad resistances, and immunities for any single or dual-type combination.",
+                description = "Damage multipliers for any single or dual typing.",
                 icon = Icons.Default.FlashOn,
-                iconColor = Color(0xFFFBC02D),
                 onClick = onNavigateToTypeChart,
             )
 
             ExploreToolCard(
                 title = "Moves Database",
-                description = "Search all Pokémon moves, inspect base power, accuracy, PP, damage categories, and battle effects.",
+                description = "Power, accuracy, PP, category and effect.",
                 icon = Icons.Default.AutoAwesome,
-                iconColor = Color(0xFFE53935),
                 onClick = onNavigateToMoves,
             )
 
             ExploreToolCard(
                 title = "Abilities Database",
-                description = "Look up in-depth passive ability effects and view all species and hidden ability bearers across generations.",
+                description = "Ability effects and which species carry them.",
                 icon = Icons.Default.Psychology,
-                iconColor = Color(0xFF8E24AA),
                 onClick = onNavigateToAbilities,
             )
 
             ExploreToolCard(
-                title = "Items & Medicine Database",
-                description = "Browse Poké Balls, held items, battle items, evolution stones, berries, and regional recovery medicine.",
+                title = "Items Database",
+                description = "Poké Balls, held items, stones, berries and medicine.",
                 icon = Icons.Default.Inventory2,
-                iconColor = Color(0xFF1E88E5),
                 onClick = onNavigateToItems,
             )
 
             ExploreToolCard(
                 title = "Regions & Generations",
-                description = "Explore Pokémon regions from Kanto to Paldea, their regional Pokédex rosters, and game version groups.",
+                description = "Kanto to Paldea, with regional Pokédex rosters.",
                 icon = Icons.Default.Map,
-                iconColor = Color(0xFF43A047),
                 onClick = onNavigateToRegions,
             )
         }
@@ -113,7 +95,6 @@ private fun ExploreToolCard(
     title: String,
     description: String,
     icon: ImageVector,
-    iconColor: Color,
     onClick: () -> Unit,
 ) {
     Card(
@@ -134,15 +115,15 @@ private fun ExploreToolCard(
         ) {
             Surface(
                 shape = RoundedCornerShape(12.dp),
-                color = iconColor.copy(alpha = 0.15f),
-                modifier = Modifier.size(48.dp),
+                color = MaterialTheme.colorScheme.surfaceVariant,
+                modifier = Modifier.size(44.dp),
             ) {
                 Box(contentAlignment = Alignment.Center) {
                     Icon(
                         imageVector = icon,
                         contentDescription = null,
-                        tint = iconColor,
-                        modifier = Modifier.size(24.dp),
+                        tint = MaterialTheme.colorScheme.onSurface,
+                        modifier = Modifier.size(22.dp),
                     )
                 }
             }
@@ -151,10 +132,10 @@ private fun ExploreToolCard(
                 Text(
                     text = title,
                     style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.Bold,
+                    fontWeight = FontWeight.SemiBold,
                     color = MaterialTheme.colorScheme.onSurface,
                 )
-                Spacer(Modifier.height(4.dp))
+                Spacer(Modifier.height(2.dp))
                 Text(
                     text = description,
                     style = MaterialTheme.typography.bodySmall,
@@ -172,3 +153,4 @@ private fun ExploreToolCard(
         }
     }
 }
+

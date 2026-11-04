@@ -1,5 +1,6 @@
 package com.oaklog.app.presentation.teams
 
+import com.oaklog.app.presentation.components.Card
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -253,3 +254,4 @@ fun TeamAnalysisView(
         }
     }
 }
+

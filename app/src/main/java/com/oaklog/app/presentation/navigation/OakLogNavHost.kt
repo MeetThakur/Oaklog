@@ -2,8 +2,10 @@ package com.oaklog.app.presentation.navigation
 
 import androidx.compose.animation.AnimatedContentTransitionScope
 import androidx.compose.animation.core.tween
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -40,6 +42,8 @@ fun OakLogNavHost(
         bottomBar = {
             OakLogBottomBar(navController = navController)
         },
+        contentWindowInsets = WindowInsets(0),
+        containerColor = MaterialTheme.colorScheme.background,
         modifier = modifier.fillMaxSize(),
     ) { innerPadding ->
         NavHost(
@@ -204,3 +208,4 @@ fun OakLogNavHost(
         }
     }
 }
+

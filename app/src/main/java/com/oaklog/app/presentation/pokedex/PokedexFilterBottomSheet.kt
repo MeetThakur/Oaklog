@@ -1,5 +1,6 @@
 package com.oaklog.app.presentation.pokedex
 
+import com.oaklog.app.presentation.components.FilterChip
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
@@ -222,3 +223,4 @@ fun PokedexFilterBottomSheet(
         }
     }
 }
+

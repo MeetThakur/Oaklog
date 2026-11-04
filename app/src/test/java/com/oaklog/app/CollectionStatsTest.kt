@@ -36,3 +36,4 @@ class CollectionStatsTest {
         assertEquals(CollectionStatus.CAUGHT, unShiny.status)
     }
 }
+

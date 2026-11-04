@@ -12,3 +12,4 @@ interface CollectionRepository {
     suspend fun toggleFavorite(speciesId: Int)
     suspend fun toggleShiny(speciesId: Int)
 }
+

@@ -72,3 +72,4 @@ class TypeChartTest {
         assertEquals(0.0, immunities["electric"]!!, 0.001)
     }
 }
+

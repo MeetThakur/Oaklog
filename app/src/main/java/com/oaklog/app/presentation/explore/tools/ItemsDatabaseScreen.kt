@@ -1,5 +1,6 @@
 package com.oaklog.app.presentation.explore.tools
 
+import com.oaklog.app.presentation.components.Card
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -60,7 +61,7 @@ fun ItemsDatabaseScreen(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(horizontal = 16.dp, vertical = 8.dp),
-                placeholder = { Text("Search items (e.g. Master Ball, Leftovers)...") },
+                placeholder = { Text("Search items") },
                 leadingIcon = { Icon(Icons.Default.Search, contentDescription = null) },
                 trailingIcon = {
                     if (query.isNotEmpty()) {
@@ -73,7 +74,7 @@ fun ItemsDatabaseScreen(
                     }
                 },
                 singleLine = true,
-                shape = RoundedCornerShape(12.dp),
+                shape = RoundedCornerShape(28.dp),
             )
 
             Box(modifier = Modifier.weight(1f)) {
@@ -170,3 +171,4 @@ fun ItemsDatabaseScreen(
         }
     }
 }
+

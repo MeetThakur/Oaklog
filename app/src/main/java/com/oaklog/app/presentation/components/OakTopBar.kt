@@ -1,6 +1,7 @@
 package com.oaklog.app.presentation.components
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -36,8 +37,7 @@ fun OakTopBar(
         title = {
             Text(
                 text = title,
-                style = MaterialTheme.typography.titleLarge,
-                fontWeight = FontWeight.Bold,
+                style = MaterialTheme.typography.headlineSmall,
             )
         },
         navigationIcon = {
@@ -59,12 +59,13 @@ fun OakTopBar(
     )
 }
 
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun OakSearchBar(
     query: String,
     onQueryChange: (String) -> Unit,
     modifier: Modifier = Modifier,
-    placeholder: String = "Search Pokémon by name or #...",
+    placeholder: String = "Search name or number",
     onFilterClick: (() -> Unit)? = null,
     activeFilterCount: Int = 0,
     layout: DexLayout = DexLayout.GRID,
@@ -80,7 +81,7 @@ fun OakSearchBar(
         OutlinedTextField(
             value = query,
             onValueChange = onQueryChange,
-            modifier = Modifier.weight(1f),
+            modifier = Modifier.weight(1f).heightIn(min = 48.dp),
             placeholder = {
                 Text(
                     text = placeholder,
@@ -109,24 +110,24 @@ fun OakSearchBar(
                 }
             },
             singleLine = true,
-            shape = RoundedCornerShape(14.dp),
+            textStyle = MaterialTheme.typography.bodyMedium,
+            shape = RoundedCornerShape(28.dp),
             colors = OutlinedTextFieldDefaults.colors(
                 focusedContainerColor = MaterialTheme.colorScheme.surface,
                 unfocusedContainerColor = MaterialTheme.colorScheme.surface,
-                focusedBorderColor = MaterialTheme.colorScheme.primary,
-                unfocusedBorderColor = MaterialTheme.colorScheme.outline.copy(alpha = 0.5f),
+                focusedBorderColor = MaterialTheme.colorScheme.onSurface,
+                unfocusedBorderColor = MaterialTheme.colorScheme.outline,
+                cursorColor = MaterialTheme.colorScheme.onSurface,
             ),
         )
 
         // Filter button with badge
         if (onFilterClick != null) {
             Box {
-                IconButton(
+                FilledTonalIconButton(
                     onClick = onFilterClick,
-                    modifier = Modifier
-                        .size(48.dp)
-                        .clip(RoundedCornerShape(12.dp))
-                        .background(MaterialTheme.colorScheme.surface),
+                    shapes = IconButtonDefaults.shapes(),
+                    modifier = Modifier.size(52.dp),
                 ) {
                     Icon(
                         imageVector = Icons.Outlined.FilterList,
@@ -157,12 +158,10 @@ fun OakSearchBar(
 
         // Layout toggle (Grid / List)
         if (onToggleLayout != null) {
-            IconButton(
+            FilledTonalIconButton(
                 onClick = onToggleLayout,
-                modifier = Modifier
-                    .size(48.dp)
-                    .clip(RoundedCornerShape(12.dp))
-                    .background(MaterialTheme.colorScheme.surface),
+                shapes = IconButtonDefaults.shapes(),
+                modifier = Modifier.size(52.dp),
             ) {
                 Icon(
                     imageVector = if (layout == DexLayout.GRID) Icons.AutoMirrored.Outlined.ViewList else Icons.Outlined.GridView,

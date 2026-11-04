@@ -72,3 +72,4 @@ class CollectionRepositoryImpl @Inject constructor(
         )
     }
 }
+

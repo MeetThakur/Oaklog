@@ -7,6 +7,9 @@ import com.oaklog.app.domain.model.*
 import com.oaklog.app.domain.repository.PokemonRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -62,10 +65,10 @@ class ExploreViewModel @Inject constructor(
         viewModelScope.launch(Dispatchers.IO) {
             _uiState.update { it.copy(isLoading = true) }
             pokemonRepo.getMoveList(limit = 40).onSuccess { list ->
-                val details = list.mapNotNull {
-                    pokemonRepo.getMove(it.name).getOrNull()
-                }
+                val details = fetchDetails(list) { pokemonRepo.getMove(it).getOrNull() }
                 _uiState.update { it.copy(movesList = details, isLoading = false) }
+            }.onFailure {
+                _uiState.update { it.copy(isLoading = false) }
             }
         }
     }
@@ -91,10 +94,10 @@ class ExploreViewModel @Inject constructor(
         viewModelScope.launch(Dispatchers.IO) {
             _uiState.update { it.copy(isLoading = true) }
             pokemonRepo.getAbilityList(limit = 40).onSuccess { list ->
-                val details = list.mapNotNull {
-                    pokemonRepo.getAbility(it.name).getOrNull()
-                }
+                val details = fetchDetails(list) { pokemonRepo.getAbility(it).getOrNull() }
                 _uiState.update { it.copy(abilitiesList = details, isLoading = false) }
+            }.onFailure {
+                _uiState.update { it.copy(isLoading = false) }
             }
         }
     }
@@ -120,10 +123,10 @@ class ExploreViewModel @Inject constructor(
         viewModelScope.launch(Dispatchers.IO) {
             _uiState.update { it.copy(isLoading = true) }
             pokemonRepo.getItemList(limit = 40).onSuccess { list ->
-                val details = list.mapNotNull {
-                    pokemonRepo.getItem(it.name).getOrNull()
-                }
+                val details = fetchDetails(list) { pokemonRepo.getItem(it).getOrNull() }
                 _uiState.update { it.copy(itemsList = details, isLoading = false) }
+            }.onFailure {
+                _uiState.update { it.copy(isLoading = false) }
             }
         }
     }
@@ -142,5 +145,13 @@ class ExploreViewModel @Inject constructor(
                 _uiState.update { it.copy(itemsList = emptyList(), isLoading = false) }
             }
         }
+    }
+
+    /** Resolves details a few at a time so a cold cache doesn't serialize 40 network calls. */
+    private suspend fun <T : Any> fetchDetails(
+        entries: List<NamedEntry>,
+        load: suspend (String) -> T?,
+    ): List<T> = entries.chunked(8).flatMap { batch ->
+        coroutineScope { batch.map { async { load(it.name) } }.awaitAll().filterNotNull() }
     }
 }

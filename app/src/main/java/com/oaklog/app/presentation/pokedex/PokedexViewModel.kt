@@ -10,8 +10,10 @@ import com.oaklog.app.domain.logic.SortField
 import com.oaklog.app.domain.model.CollectionEntry
 import com.oaklog.app.domain.model.DexLayout
 import com.oaklog.app.domain.model.PokemonSummary
+import com.oaklog.app.domain.model.ThemeMode
 import com.oaklog.app.domain.model.UserSettings
 import com.oaklog.app.domain.repository.CollectionRepository
+import com.oaklog.app.domain.repository.IndexProgress
 import com.oaklog.app.domain.repository.PokemonRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
@@ -27,6 +29,8 @@ data class PokedexUiState(
     val isLoading: Boolean = false,
     val error: String? = null,
     val totalCount: Int = 0,
+    /** Set while the index is being filled in for detail-dependent filters and sorts. */
+    val indexProgress: IndexProgress? = null,
 )
 
 @HiltViewModel
@@ -45,7 +49,7 @@ class PokedexViewModel @Inject constructor(
         collectionRepo.observeCollection(),
         _filters,
         settingsStore.settings,
-        combine(_isLoading, _error) { l, e -> l to e },
+        combine(_isLoading, _error, pokemonRepo.hydrationProgress) { l, e, p -> Triple(l, e, p) },
     ) { allPokemon, collection, filters, settings, status ->
         val filtered = PokedexQuery.apply(allPokemon, collection, filters)
         PokedexUiState(
@@ -56,6 +60,7 @@ class PokedexViewModel @Inject constructor(
             isLoading = status.first,
             error = status.second,
             totalCount = allPokemon.size,
+            indexProgress = status.third,
         )
     }.stateIn(
         scope = viewModelScope,
@@ -65,6 +70,14 @@ class PokedexViewModel @Inject constructor(
 
     init {
         sync()
+        // Legendary/mythical filters and height/weight/BST sorts need columns the cheap species list
+        // lacks, so fill them in the first time one is requested.
+        viewModelScope.launch(Dispatchers.IO) {
+            _filters.map { it.needsDetails }
+                .distinctUntilChanged()
+                .filter { it }
+                .collect { pokemonRepo.hydrateIndex() }
+        }
     }
 
     fun sync(force: Boolean = false) {
@@ -103,6 +116,10 @@ class PokedexViewModel @Inject constructor(
 
     fun resetFilters() {
         _filters.update { PokedexFilters(query = it.query) }
+    }
+
+    fun setThemeMode(mode: ThemeMode) {
+        viewModelScope.launch { settingsStore.setTheme(mode) }
     }
 
     fun toggleLayout() {

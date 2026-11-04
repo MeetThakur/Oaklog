@@ -1,5 +1,7 @@
 package com.oaklog.app.presentation.detail.tabs
 
+import com.oaklog.app.presentation.components.Card
+import com.oaklog.app.presentation.components.FilterChip
 import androidx.compose.foundation.background
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.*
@@ -15,7 +17,10 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.oaklog.app.domain.logic.NameFormatter
+import com.oaklog.app.domain.model.AbilityInfo
 import com.oaklog.app.domain.model.PokemonDetail
+import com.oaklog.app.presentation.components.DropdownOption
+import com.oaklog.app.presentation.components.OakDropdown
 import com.oaklog.app.presentation.theme.OakRedPrimary
 
 @Composable
@@ -23,6 +28,7 @@ fun OverviewTab(
     detail: PokemonDetail,
     selectedDexVersion: String?,
     onSelectDexVersion: (String) -> Unit,
+    abilityInfo: Map<String, AbilityInfo> = emptyMap(),
     modifier: Modifier = Modifier,
 ) {
     Column(
@@ -60,8 +66,8 @@ fun OverviewTab(
                     Text(
                         text = "Professor Oak's Field Notes",
                         style = MaterialTheme.typography.titleSmall,
-                        fontWeight = FontWeight.Bold,
-                        color = MaterialTheme.colorScheme.primary,
+                        fontWeight = FontWeight.SemiBold,
+                        color = MaterialTheme.colorScheme.onSurface,
                     )
                     Spacer(Modifier.height(8.dp))
 
@@ -76,26 +82,12 @@ fun OverviewTab(
 
                     Spacer(Modifier.height(12.dp))
 
-                    // Version selector chips
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .horizontalScroll(rememberScrollState()),
-                        horizontalArrangement = Arrangement.spacedBy(6.dp),
-                    ) {
-                        detail.dexEntries.forEach { entry ->
-                            FilterChip(
-                                selected = entry.versionName == selectedDexVersion,
-                                onClick = { onSelectDexVersion(entry.versionName) },
-                                label = {
-                                    Text(
-                                        text = NameFormatter.pretty(entry.versionName),
-                                        fontSize = 11.sp,
-                                    )
-                                },
-                            )
-                        }
-                    }
+                    OakDropdown(
+                        label = "Game version",
+                        options = detail.dexEntries.map { DropdownOption(it.versionName, NameFormatter.pretty(it.versionName)) },
+                        selected = selectedDexVersion,
+                        onSelect = onSelectDexVersion,
+                    )
                 }
             }
         }
@@ -137,38 +129,58 @@ fun OverviewTab(
                 Text(
                     text = "Abilities",
                     style = MaterialTheme.typography.titleSmall,
-                    fontWeight = FontWeight.Bold,
-                    color = MaterialTheme.colorScheme.primary,
+                    fontWeight = FontWeight.SemiBold,
+                    color = MaterialTheme.colorScheme.onSurface,
                 )
                 Spacer(Modifier.height(8.dp))
 
-                detail.abilities.forEach { ability ->
+                detail.abilities.forEachIndexed { index, ability ->
+                    if (index > 0) {
+                        HorizontalDivider(
+                            modifier = Modifier.padding(vertical = 8.dp),
+                            color = MaterialTheme.colorScheme.outline,
+                        )
+                    }
                     Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(vertical = 4.dp),
+                        modifier = Modifier.fillMaxWidth(),
                         verticalAlignment = Alignment.CenterVertically,
                         horizontalArrangement = Arrangement.SpaceBetween,
                     ) {
                         Text(
                             text = NameFormatter.pretty(ability.name),
                             style = MaterialTheme.typography.bodyMedium,
-                            fontWeight = FontWeight.Medium,
+                            fontWeight = FontWeight.SemiBold,
                         )
                         if (ability.isHidden) {
                             Surface(
                                 shape = RoundedCornerShape(6.dp),
-                                color = MaterialTheme.colorScheme.primaryContainer,
+                                color = MaterialTheme.colorScheme.surfaceVariant,
                             ) {
                                 Text(
                                     text = "Hidden",
                                     fontSize = 10.sp,
-                                    fontWeight = FontWeight.Bold,
-                                    color = MaterialTheme.colorScheme.onPrimaryContainer,
+                                    fontWeight = FontWeight.Medium,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
                                     modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp),
                                 )
                             }
                         }
+                    }
+                    Spacer(Modifier.height(2.dp))
+                    val definition = abilityInfo[ability.name]?.let { it.shortDescription ?: it.description }
+                    if (definition != null) {
+                        Text(
+                            text = definition,
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            lineHeight = 18.sp,
+                        )
+                    } else {
+                        Text(
+                            text = "Loading definition…",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f),
+                        )
                     }
                 }
             }
@@ -186,8 +198,8 @@ fun OverviewTab(
                 Text(
                     text = "Breeding & Capture",
                     style = MaterialTheme.typography.titleSmall,
-                    fontWeight = FontWeight.Bold,
-                    color = MaterialTheme.colorScheme.primary,
+                    fontWeight = FontWeight.SemiBold,
+                    color = MaterialTheme.colorScheme.onSurface,
                 )
 
                 // Gender Ratio
@@ -299,3 +311,4 @@ private fun DimensionItem(
         )
     }
 }
+

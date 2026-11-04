@@ -1,5 +1,7 @@
 package com.oaklog.app.presentation.settings
 
+import com.oaklog.app.presentation.components.Card
+import com.oaklog.app.presentation.components.FilterChip
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -97,6 +99,12 @@ fun SettingsScreen(
                         Switch(
                             checked = state.settings.dynamicColor,
                             onCheckedChange = viewModel::setDynamicColor,
+                            // The hairline outline role is too faint to draw the off-state thumb.
+                            colors = SwitchDefaults.colors(
+                                uncheckedThumbColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                                uncheckedTrackColor = MaterialTheme.colorScheme.surfaceVariant,
+                                uncheckedBorderColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                            ),
                         )
                     }
 
@@ -291,3 +299,4 @@ fun SettingsScreen(
         )
     }
 }
+

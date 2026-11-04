@@ -1,5 +1,6 @@
 package com.oaklog.app.presentation.detail.tabs
 
+import com.oaklog.app.presentation.components.Card
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
@@ -39,8 +40,8 @@ fun StatsTab(
                     Text(
                         text = "Base Stats",
                         style = MaterialTheme.typography.titleMedium,
-                        fontWeight = FontWeight.Bold,
-                        color = MaterialTheme.colorScheme.primary,
+                        fontWeight = FontWeight.SemiBold,
+                        color = MaterialTheme.colorScheme.onSurface,
                     )
                     Text(
                         text = "Max 255",
@@ -91,8 +92,8 @@ fun StatsTab(
                 Text(
                     text = "Stat Evaluation",
                     style = MaterialTheme.typography.titleSmall,
-                    fontWeight = FontWeight.Bold,
-                    color = MaterialTheme.colorScheme.primary,
+                    fontWeight = FontWeight.SemiBold,
+                    color = MaterialTheme.colorScheme.onSurface,
                 )
                 Spacer(Modifier.height(8.dp))
 
@@ -121,3 +122,4 @@ fun StatsTab(
         }
     }
 }
+

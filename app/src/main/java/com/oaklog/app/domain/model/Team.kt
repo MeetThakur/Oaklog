@@ -21,3 +21,4 @@ data class Team(
     val updatedAt: Long = System.currentTimeMillis(),
     val members: List<TeamMember> = emptyList(),
 )
+

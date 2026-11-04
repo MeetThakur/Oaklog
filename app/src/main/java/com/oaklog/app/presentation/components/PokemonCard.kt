@@ -1,18 +1,18 @@
 package com.oaklog.app.presentation.components
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -21,9 +21,35 @@ import coil3.compose.AsyncImage
 import com.oaklog.app.domain.logic.NameFormatter
 import com.oaklog.app.domain.model.CollectionEntry
 import com.oaklog.app.domain.model.PokemonSummary
-import com.oaklog.app.presentation.theme.OakOutlineDark
-import com.oaklog.app.presentation.theme.OakOutlineLight
 import com.oaklog.app.presentation.theme.PokemonTypeColors
+
+private fun artworkUrl(id: Int) =
+    "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/$id.png"
+
+/** Soft type-tinted disc behind the artwork: the only place type color fills a surface. */
+@Composable
+private fun ArtworkDisc(
+    pokemon: PokemonSummary,
+    size: androidx.compose.ui.unit.Dp,
+    artSize: androidx.compose.ui.unit.Dp,
+    modifier: Modifier = Modifier,
+) {
+    val tint = PokemonTypeColors.color(pokemon.types.firstOrNull() ?: "unknown")
+    Box(
+        modifier = modifier
+            .size(size)
+            .clip(CircleShape)
+            .background(Brush.radialGradient(listOf(tint.copy(alpha = 0.22f), tint.copy(alpha = 0.04f)))),
+        contentAlignment = Alignment.Center,
+    ) {
+        AsyncImage(
+            model = artworkUrl(pokemon.id),
+            contentDescription = pokemon.name,
+            modifier = Modifier.size(artSize),
+            contentScale = ContentScale.Fit,
+        )
+    }
+}
 
 @Composable
 fun PokemonGridCard(
@@ -34,26 +60,15 @@ fun PokemonGridCard(
     onToggleFavorite: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    val isDark = isSystemInDarkTheme()
-    val typeBg = PokemonTypeColors.cardBackground(pokemon.types, isDark)
-    val artworkUrl = "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/${pokemon.id}.png"
-
     Card(
-        modifier = modifier
-            .fillMaxWidth()
-            .clip(RoundedCornerShape(16.dp))
-            .clickable { onClick() },
+        onClick = onClick,
+        modifier = modifier.fillMaxWidth(),
         shape = RoundedCornerShape(16.dp),
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
-        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
+        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline),
+        elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
     ) {
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .background(typeBg)
-                .padding(10.dp),
-        ) {
-            // Header: # number and favorite button
+        Column(modifier = Modifier.fillMaxWidth().padding(12.dp)) {
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
@@ -61,62 +76,43 @@ fun PokemonGridCard(
             ) {
                 Text(
                     text = NameFormatter.dexNumber(pokemon.id),
-                    fontSize = 12.sp,
-                    fontWeight = FontWeight.Bold,
+                    fontSize = 11.sp,
+                    fontFamily = FontFamily.Monospace,
+                    fontWeight = FontWeight.Medium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
-                FavoriteIconButton(
-                    isFavorite = collectionEntry?.favorite == true,
-                    onToggle = onToggleFavorite,
-                )
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    StatusDot(entry = collectionEntry, onCycleStatus = onCycleStatus)
+                    FavoriteIconButton(
+                        isFavorite = collectionEntry?.favorite == true,
+                        onToggle = onToggleFavorite,
+                    )
+                }
             }
 
-            // Pokémon Official Artwork
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(110.dp),
-                contentAlignment = Alignment.Center,
-            ) {
-                AsyncImage(
-                    model = artworkUrl,
-                    contentDescription = pokemon.name,
-                    modifier = Modifier.size(100.dp),
-                    contentScale = ContentScale.Fit,
-                )
-            }
+            ArtworkDisc(
+                pokemon = pokemon,
+                size = 112.dp,
+                artSize = 96.dp,
+                modifier = Modifier.align(Alignment.CenterHorizontally),
+            )
 
-            Spacer(Modifier.height(6.dp))
+            Spacer(Modifier.height(10.dp))
 
-            // Pokémon Name
             Text(
                 text = pokemon.name,
                 style = MaterialTheme.typography.titleMedium,
-                fontWeight = FontWeight.Bold,
+                fontWeight = FontWeight.SemiBold,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis,
                 color = MaterialTheme.colorScheme.onSurface,
             )
 
-            Spacer(Modifier.height(4.dp))
+            Spacer(Modifier.height(6.dp))
 
-            // Types
-            Row(
-                horizontalArrangement = Arrangement.spacedBy(4.dp),
-            ) {
-                pokemon.types.forEach { type ->
-                    TypeBadge(type = type, small = true)
-                }
+            Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+                pokemon.types.forEach { TypeBadge(type = it, small = true) }
             }
-
-            Spacer(Modifier.height(8.dp))
-
-            // Caught / Seen status
-            CollectionStatusButton(
-                entry = collectionEntry,
-                onCycleStatus = onCycleStatus,
-                modifier = Modifier.fillMaxWidth(),
-            )
         }
     }
 }
@@ -130,76 +126,49 @@ fun PokemonListCard(
     onToggleFavorite: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    val isDark = isSystemInDarkTheme()
-    val typeBg = PokemonTypeColors.cardBackground(pokemon.types, isDark)
-    val artworkUrl = "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/${pokemon.id}.png"
-
     Card(
-        modifier = modifier
-            .fillMaxWidth()
-            .clip(RoundedCornerShape(14.dp))
-            .clickable { onClick() },
+        onClick = onClick,
+        modifier = modifier.fillMaxWidth(),
         shape = RoundedCornerShape(14.dp),
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
-        elevation = CardDefaults.cardElevation(defaultElevation = 1.dp),
+        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline),
+        elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
     ) {
         Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .background(typeBg)
-                .padding(12.dp),
+            modifier = Modifier.fillMaxWidth().padding(horizontal = 12.dp, vertical = 10.dp),
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            // Artwork
-            AsyncImage(
-                model = artworkUrl,
-                contentDescription = pokemon.name,
-                modifier = Modifier.size(64.dp),
-                contentScale = ContentScale.Fit,
-            )
+            ArtworkDisc(pokemon = pokemon, size = 60.dp, artSize = 52.dp)
 
-            Spacer(Modifier.width(12.dp))
+            Spacer(Modifier.width(14.dp))
 
-            // Info column
-            Column(
-                modifier = Modifier.weight(1f),
-            ) {
+            Column(modifier = Modifier.weight(1f)) {
                 Text(
                     text = NameFormatter.dexNumber(pokemon.id),
                     fontSize = 11.sp,
-                    fontWeight = FontWeight.Bold,
+                    fontFamily = FontFamily.Monospace,
+                    fontWeight = FontWeight.Medium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
                 Text(
                     text = pokemon.name,
                     style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.Bold,
+                    fontWeight = FontWeight.SemiBold,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
                     color = MaterialTheme.colorScheme.onSurface,
                 )
                 Spacer(Modifier.height(4.dp))
-                Row(
-                    horizontalArrangement = Arrangement.spacedBy(4.dp),
-                ) {
-                    pokemon.types.forEach { type ->
-                        TypeBadge(type = type, small = true)
-                    }
+                Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+                    pokemon.types.forEach { TypeBadge(type = it, small = true) }
                 }
             }
 
-            // Action buttons
-            Column(
-                horizontalAlignment = Alignment.End,
-                verticalArrangement = Arrangement.spacedBy(4.dp),
-            ) {
-                FavoriteIconButton(
-                    isFavorite = collectionEntry?.favorite == true,
-                    onToggle = onToggleFavorite,
-                )
-                CollectionStatusButton(
-                    entry = collectionEntry,
-                    onCycleStatus = onCycleStatus,
-                )
-            }
+            StatusDot(entry = collectionEntry, onCycleStatus = onCycleStatus)
+            FavoriteIconButton(
+                isFavorite = collectionEntry?.favorite == true,
+                onToggle = onToggleFavorite,
+            )
         }
     }
 }

@@ -1,6 +1,8 @@
 package com.oaklog.app.presentation.explore.tools
 
-import androidx.compose.foundation.horizontalScroll
+import com.oaklog.app.presentation.components.Card
+import com.oaklog.app.presentation.components.DropdownOption
+import com.oaklog.app.presentation.components.OakDropdown
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -10,6 +12,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -34,6 +37,16 @@ fun TypeChartScreen(
 
     var selectedMode by remember { mutableIntStateOf(0) } // 0: Defending, 1: Attacking
     val allTypes = remember(typeChart) { typeChart.types.sorted() }
+    val typeOptions = remember(allTypes) {
+        allTypes.map { DropdownOption(it, it.replaceFirstChar { c -> c.uppercase() }) }
+    }
+    val dark = MaterialTheme.colorScheme.background.luminance() < 0.5f
+    // Brighter hues on dark surfaces keep the group headings readable.
+    val extremeWeak = if (dark) Color(0xFFFF6B6B) else Color(0xFFB71C1C)
+    val weak = if (dark) Color(0xFFFF8A80) else Color(0xFFE53935)
+    val resist = if (dark) Color(0xFF81C784) else Color(0xFF2E7D32)
+    val immuneColor = if (dark) Color(0xFFB39DDB) else Color(0xFF512DA8)
+    val notVeryColor = if (dark) Color(0xFFFFB74D) else Color(0xFFE65100)
 
     // Defending Mode States
     var defenderType1 by remember { mutableStateOf(allTypes.firstOrNull() ?: "normal") }
@@ -94,50 +107,26 @@ fun TypeChartScreen(
                             color = MaterialTheme.colorScheme.primary,
                         )
 
-                        Spacer(Modifier.height(10.dp))
+                        Spacer(Modifier.height(12.dp))
 
-                        // Type 1 selector
-                        Text("Primary Type", style = MaterialTheme.typography.bodySmall)
-                        Row(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .horizontalScroll(rememberScrollState())
-                                .padding(vertical = 4.dp),
-                            horizontalArrangement = Arrangement.spacedBy(6.dp),
-                        ) {
-                            allTypes.forEach { type ->
-                                FilterChip(
-                                    selected = defenderType1 == type,
-                                    onClick = { defenderType1 = type },
-                                    label = { Text(type.replaceFirstChar { it.uppercase() }) },
-                                )
-                            }
-                        }
+                        OakDropdown(
+                            label = "Primary type",
+                            options = typeOptions,
+                            selected = defenderType1,
+                            onSelect = {
+                                defenderType1 = it
+                                if (defenderType2 == it) defenderType2 = null
+                            },
+                        )
 
-                        Spacer(Modifier.height(8.dp))
+                        Spacer(Modifier.height(12.dp))
 
-                        // Type 2 selector
-                        Text("Secondary Type (Optional)", style = MaterialTheme.typography.bodySmall)
-                        Row(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .horizontalScroll(rememberScrollState())
-                                .padding(vertical = 4.dp),
-                            horizontalArrangement = Arrangement.spacedBy(6.dp),
-                        ) {
-                            FilterChip(
-                                selected = defenderType2 == null,
-                                onClick = { defenderType2 = null },
-                                label = { Text("None") },
-                            )
-                            allTypes.filter { it != defenderType1 }.forEach { type ->
-                                FilterChip(
-                                    selected = defenderType2 == type,
-                                    onClick = { defenderType2 = type },
-                                    label = { Text(type.replaceFirstChar { it.uppercase() }) },
-                                )
-                            }
-                        }
+                        OakDropdown(
+                            label = "Secondary type (optional)",
+                            options = listOf(DropdownOption("", "None")) + typeOptions.filter { it.value != defenderType1 },
+                            selected = defenderType2 ?: "",
+                            onSelect = { defenderType2 = it.ifEmpty { null } },
+                        )
                     }
                 }
 
@@ -161,19 +150,19 @@ fun TypeChartScreen(
                     verticalArrangement = Arrangement.spacedBy(12.dp),
                 ) {
                     if (quadWeak.isNotEmpty()) {
-                        EffectivenessGroupCard(title = "Takes 4× Damage (Extreme Weakness)", types = quadWeak, tagColor = Color(0xFFB71C1C))
+                        EffectivenessGroupCard(title = "Takes 4× Damage (Extreme Weakness)", types = quadWeak, tagColor = extremeWeak)
                     }
                     if (doubleWeak.isNotEmpty()) {
-                        EffectivenessGroupCard(title = "Takes 2× Damage (Weakness)", types = doubleWeak, tagColor = Color(0xFFE53935))
+                        EffectivenessGroupCard(title = "Takes 2× Damage (Weakness)", types = doubleWeak, tagColor = weak)
                     }
                     if (halfResist.isNotEmpty()) {
-                        EffectivenessGroupCard(title = "Takes ½× Damage (Resistance)", types = halfResist, tagColor = Color(0xFF43A047))
+                        EffectivenessGroupCard(title = "Takes ½× Damage (Resistance)", types = halfResist, tagColor = resist)
                     }
                     if (quarterResist.isNotEmpty()) {
-                        EffectivenessGroupCard(title = "Takes ¼× Damage (Extreme Resistance)", types = quarterResist, tagColor = Color(0xFF2E7D32))
+                        EffectivenessGroupCard(title = "Takes ¼× Damage (Extreme Resistance)", types = quarterResist, tagColor = resist)
                     }
                     if (immune.isNotEmpty()) {
-                        EffectivenessGroupCard(title = "Takes 0× Damage (Complete Immunity)", types = immune, tagColor = Color(0xFF512DA8))
+                        EffectivenessGroupCard(title = "Takes 0× Damage (Complete Immunity)", types = immune, tagColor = immuneColor)
                     }
                     if (normalDamage.isNotEmpty()) {
                         EffectivenessGroupCard(title = "Takes 1× Damage (Neutral)", types = normalDamage, tagColor = MaterialTheme.colorScheme.onSurfaceVariant)
@@ -196,22 +185,14 @@ fun TypeChartScreen(
                             color = MaterialTheme.colorScheme.primary,
                         )
 
-                        Spacer(Modifier.height(10.dp))
+                        Spacer(Modifier.height(12.dp))
 
-                        Row(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .horizontalScroll(rememberScrollState()),
-                            horizontalArrangement = Arrangement.spacedBy(6.dp),
-                        ) {
-                            allTypes.forEach { type ->
-                                FilterChip(
-                                    selected = attackingType == type,
-                                    onClick = { attackingType = type },
-                                    label = { Text(type.replaceFirstChar { it.uppercase() }) },
-                                )
-                            }
-                        }
+                        OakDropdown(
+                            label = "Move type",
+                            options = typeOptions,
+                            selected = attackingType,
+                            onSelect = { attackingType = it },
+                        )
                     }
                 }
 
@@ -234,10 +215,10 @@ fun TypeChartScreen(
                         EffectivenessGroupCard(title = "Super-Effective (2× Damage)", types = superEffective, tagColor = OakCaughtGreen)
                     }
                     if (notVery.isNotEmpty()) {
-                        EffectivenessGroupCard(title = "Not Very Effective (½× Damage)", types = notVery, tagColor = Color(0xFFFB8C00))
+                        EffectivenessGroupCard(title = "Not Very Effective (½× Damage)", types = notVery, tagColor = notVeryColor)
                     }
                     if (noEffect.isNotEmpty()) {
-                        EffectivenessGroupCard(title = "No Effect (0× Damage)", types = noEffect, tagColor = Color(0xFF512DA8))
+                        EffectivenessGroupCard(title = "No Effect (0× Damage)", types = noEffect, tagColor = immuneColor)
                     }
                     if (neutral.isNotEmpty()) {
                         EffectivenessGroupCard(title = "Neutral Damage (1× Damage)", types = neutral, tagColor = MaterialTheme.colorScheme.onSurfaceVariant)
@@ -256,9 +237,9 @@ private fun EffectivenessGroupCard(
     tagColor: Color,
 ) {
     Card(
+        modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(14.dp),
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
-        elevation = CardDefaults.cardElevation(defaultElevation = 1.dp),
     ) {
         Column(modifier = Modifier.padding(14.dp)) {
             Text(

@@ -112,3 +112,4 @@ class TeamsViewModel @Inject constructor(
         return TeamAnalyzer.analyze(tc, memberTypes)
     }
 }
+

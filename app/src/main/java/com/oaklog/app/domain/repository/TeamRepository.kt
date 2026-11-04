@@ -15,3 +15,4 @@ interface TeamRepository {
     suspend fun removeMember(memberId: Long)
     suspend fun reorderMembers(teamId: Long, memberIds: List<Long>)
 }
+

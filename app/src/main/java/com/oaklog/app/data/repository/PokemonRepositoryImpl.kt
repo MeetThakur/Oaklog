@@ -11,10 +11,19 @@ import com.oaklog.app.domain.logic.NameFormatter
 import com.oaklog.app.domain.logic.TypeChart
 import com.oaklog.app.domain.model.*
 import com.oaklog.app.domain.repository.PokemonRepository
+import com.oaklog.app.domain.repository.IndexProgress
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.Semaphore
+import kotlinx.coroutines.sync.withPermit
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.builtins.ListSerializer
 import javax.inject.Inject
@@ -93,6 +102,66 @@ class PokemonRepositoryImpl @Inject constructor(
             indexDao.upsertAll(entities)
             settingsStore.setLastIndexSync(System.currentTimeMillis())
         }
+    }
+
+    private val _hydrationProgress = MutableStateFlow<IndexProgress?>(null)
+    override val hydrationProgress: StateFlow<IndexProgress?> = _hydrationProgress
+
+    private val hydrationLock = Mutex()
+
+    override suspend fun hydrateIndex() = withContext(Dispatchers.IO) {
+        if (!hydrationLock.tryLock()) return@withContext
+        try {
+            val pending = indexDao.unhydratedIds()
+            if (pending.isEmpty()) return@withContext
+
+            // Species and pokemon payloads are large (moves, flavor text), so they go straight to the
+            // network and only the few columns we need are stored, never the full response.
+            val gate = Semaphore(HYDRATION_CONCURRENCY)
+            var done = 0
+            _hydrationProgress.value = IndexProgress(0, pending.size)
+
+            pending.chunked(HYDRATION_BATCH).forEach { batch ->
+                val rows = coroutineScope {
+                    batch.map { id ->
+                        async { gate.withPermit { runCatching { fetchIndexRow(id) }.getOrNull() } }
+                    }.awaitAll()
+                }
+                val hydrated = rows.filterNotNull()
+                if (hydrated.isNotEmpty()) indexDao.upsertAll(hydrated)
+                done += batch.size
+                _hydrationProgress.value = IndexProgress(done, pending.size)
+            }
+        } finally {
+            _hydrationProgress.value = null
+            hydrationLock.unlock()
+        }
+    }
+
+    private suspend fun fetchIndexRow(id: Int): PokemonIndexEntity {
+        val species = api.species(id.toString())
+        val pokemon = api.pokemon(id.toString())
+        val existing = indexDao.get(id)
+        val types = pokemon.types.sortedBy { it.slot }.map { it.type.name }
+        return PokemonIndexEntity(
+            id = id,
+            name = existing?.name ?: species.name,
+            displayName = existing?.displayName ?: NameFormatter.pretty(species.name),
+            type1 = types.getOrNull(0) ?: existing?.type1,
+            type2 = types.getOrNull(1) ?: existing?.type2,
+            generation = existing?.generation ?: generationForId(id),
+            height = pokemon.height,
+            weight = pokemon.weight,
+            baseStatTotal = pokemon.stats.sumOf { it.baseStat },
+            isLegendary = species.isLegendary,
+            isMythical = species.isMythical,
+            isBaby = species.isBaby,
+        )
+    }
+
+    private companion object {
+        const val HYDRATION_CONCURRENCY = 6
+        const val HYDRATION_BATCH = 24
     }
 
     private fun generationForId(id: Int): Int = when (id) {
@@ -274,17 +343,38 @@ class PokemonRepositoryImpl @Inject constructor(
         }
     }
 
+    override suspend fun getLearnset(pokemonName: String): Result<List<LearnEntry>> = withContext(Dispatchers.IO) {
+        runCatching {
+            // Same cache key as getPokemonDetail, so opening a Pokémon already paid for this payload.
+            val dto = cache.get("pokemon_$pokemonName", PokemonDto.serializer()) { api.pokemon(pokemonName) }
+            dto.moves.flatMap { m ->
+                m.versionGroupDetails.map {
+                    LearnEntry(
+                        moveName = m.move.name,
+                        method = it.moveLearnMethod.name,
+                        level = it.levelLearnedAt,
+                        versionGroup = it.versionGroup.name,
+                    )
+                }
+            }
+        }
+    }
+
     override suspend fun getAbility(nameOrId: String): Result<AbilityInfo> = withContext(Dispatchers.IO) {
         runCatching {
             val dto = cache.get("ability_$nameOrId", AbilityDto.serializer()) {
                 api.ability(nameOrId)
             }
-            val desc = dto.effectEntries.firstOrNull { it.language?.name == "en" }?.effect
+            val english = dto.effectEntries.firstOrNull { it.language?.name == "en" }
+            val desc = english?.effect
                 ?: dto.flavorTextEntries.firstOrNull { it.language?.name == "en" }?.flavorText
+            val short = english?.shortEffect
+                ?: dto.flavorTextEntries.lastOrNull { it.language?.name == "en" }?.flavorText
             AbilityInfo(
                 id = dto.id,
                 name = dto.name,
                 description = desc?.let { NameFormatter.cleanFlavor(it) },
+                shortDescription = short?.let { NameFormatter.cleanFlavor(it) },
                 generation = NameFormatter.generationFromSlug(dto.generation?.name),
                 pokemon = dto.pokemon.map {
                     AbilityPokemon(it.pokemon.name, it.pokemon.id, it.isHidden)
@@ -520,3 +610,4 @@ class PokemonRepositoryImpl @Inject constructor(
         }
     }
 }
+

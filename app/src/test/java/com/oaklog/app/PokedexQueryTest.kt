@@ -157,3 +157,4 @@ class PokedexQueryTest {
         assertEquals(680, sorted.first().baseStatTotal)
     }
 }
+

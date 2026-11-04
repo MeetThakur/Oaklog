@@ -128,3 +128,4 @@ The resulting debug APK is located at:
 
 ## 📜 Attribution
 Powered by [PokéAPI](https://pokeapi.co/). Pokémon and Pokémon character names are trademarks of Nintendo, Creatures Inc., and Game Freak.
+

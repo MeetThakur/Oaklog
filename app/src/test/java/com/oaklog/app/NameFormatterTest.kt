@@ -40,3 +40,4 @@ class NameFormatterTest {
         assertEquals(9, NameFormatter.generationFromSlug("generation-ix"))
     }
 }
+

@@ -41,5 +41,5 @@ object NameFormatter {
     }
 
     /** Species id parsed from a PokéAPI url or pokemon form id; null for non-default forms. */
-    fun cleanFlavor(text: String): String = text.replace('\n', ' ').replace('\u000c', ' ').replace("  ", " ").trim()
+    fun cleanFlavor(text: String): String = text.replace("\u00AD\n", "").replace("\u00AD", "").replace('\n', ' ').replace('\u000c', ' ').replace("  ", " ").trim()
 }

@@ -4,6 +4,7 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.oaklog.app.data.prefs.SettingsDataStore
+import com.oaklog.app.domain.logic.Learnset
 import com.oaklog.app.domain.model.*
 import com.oaklog.app.domain.repository.CollectionRepository
 import com.oaklog.app.domain.repository.PokemonRepository
@@ -17,14 +18,16 @@ data class PokemonDetailUiState(
     val detail: PokemonDetail? = null,
     val evolutionRoot: EvolutionNode? = null,
     val encounters: List<EncounterGroup> = emptyList(),
-    val moves: List<MoveInfo> = emptyList(),
+    val learnset: List<LearnEntry> = emptyList(),
+    val moveDetails: Map<String, MoveInfo> = emptyMap(),
+    val abilityInfo: Map<String, AbilityInfo> = emptyMap(),
     val collectionEntry: CollectionEntry? = null,
     val selectedVarietyName: String? = null,
     val isShiny: Boolean = false,
     val selectedDexVersion: String? = null,
     val selectedEncounterVersion: String? = null,
-    val selectedMoveMethod: String = "all",
-    val selectedMoveSort: String = "level",
+    val selectedMoveVersionGroup: String? = null,
+    val selectedMoveMethod: String = "level-up",
     val isLoading: Boolean = false,
     val error: String? = null,
 )
@@ -70,6 +73,26 @@ class PokemonDetailViewModel @Inject constructor(
                             selectedDexVersion = defaultDexVersion,
                             isLoading = false,
                         )
+                    }
+
+                    detail.abilities.forEach { ref ->
+                        launch {
+                            pokemonRepo.getAbility(ref.name).onSuccess { info ->
+                                _uiState.update { it.copy(abilityInfo = it.abilityInfo + (ref.name to info)) }
+                            }
+                        }
+                    }
+
+                    launch {
+                        pokemonRepo.getLearnset(detail.name).onSuccess { entries ->
+                            _uiState.update {
+                                it.copy(
+                                    learnset = entries,
+                                    selectedMoveVersionGroup = Learnset.versionGroups(entries).firstOrNull(),
+                                    selectedMoveMethod = "level-up",
+                                )
+                            }
+                        }
                     }
 
                     // Fetch evolution chain if available
@@ -118,12 +141,26 @@ class PokemonDetailViewModel @Inject constructor(
         _uiState.update { it.copy(selectedEncounterVersion = version) }
     }
 
+    fun selectMoveVersionGroup(group: String) {
+        _uiState.update { state ->
+            val methods = Learnset.methods(state.learnset, group)
+            val method = state.selectedMoveMethod.takeIf { it in methods } ?: methods.firstOrNull() ?: "level-up"
+            state.copy(selectedMoveVersionGroup = group, selectedMoveMethod = method)
+        }
+    }
+
     fun selectMoveMethod(method: String) {
         _uiState.update { it.copy(selectedMoveMethod = method) }
     }
 
-    fun selectMoveSort(sort: String) {
-        _uiState.update { it.copy(selectedMoveSort = sort) }
+    /** Fetches move stats the first time a row is expanded. */
+    fun loadMove(name: String) {
+        if (_uiState.value.moveDetails.containsKey(name)) return
+        viewModelScope.launch(Dispatchers.IO) {
+            pokemonRepo.getMove(name).onSuccess { info ->
+                _uiState.update { it.copy(moveDetails = it.moveDetails + (name to info)) }
+            }
+        }
     }
 
     fun cycleCollectionStatus() {
@@ -140,3 +177,4 @@ class PokemonDetailViewModel @Inject constructor(
         }
     }
 }
+

@@ -1,5 +1,6 @@
 package com.oaklog.app.presentation.detail.tabs
 
+import com.oaklog.app.presentation.components.Card
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -48,8 +49,8 @@ fun EvolutionTab(
                 Text(
                     text = "Evolution Chain",
                     style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.Bold,
-                    color = MaterialTheme.colorScheme.primary,
+                    fontWeight = FontWeight.SemiBold,
+                    color = MaterialTheme.colorScheme.onSurface,
                     modifier = Modifier.align(Alignment.Start),
                 )
                 Spacer(Modifier.height(16.dp))
@@ -220,3 +221,4 @@ private fun EvolutionPokemonNode(
         }
     }
 }
+

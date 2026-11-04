@@ -1,5 +1,6 @@
 package com.oaklog.app.presentation.detail.tabs
 
+import com.oaklog.app.presentation.components.Card
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -40,8 +41,8 @@ fun VarietiesTab(
                 Text(
                     text = "Forms & Varieties",
                     style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.Bold,
-                    color = MaterialTheme.colorScheme.primary,
+                    fontWeight = FontWeight.SemiBold,
+                    color = MaterialTheme.colorScheme.onSurface,
                 )
 
                 if (varieties.size <= 1) {
@@ -117,3 +118,4 @@ fun VarietiesTab(
         }
     }
 }
+

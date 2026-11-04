@@ -2,7 +2,9 @@ package com.oaklog.app.presentation.theme
 
 import android.os.Build
 import androidx.compose.foundation.isSystemInDarkTheme
-import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
+import androidx.compose.material3.MaterialExpressiveTheme
+import androidx.compose.material3.MotionScheme
 import androidx.compose.material3.darkColorScheme
 import androidx.compose.material3.dynamicDarkColorScheme
 import androidx.compose.material3.dynamicLightColorScheme
@@ -13,12 +15,18 @@ import androidx.compose.ui.platform.LocalContext
 import com.oaklog.app.domain.model.ThemeMode
 
 private val OakDarkColorScheme = darkColorScheme(
-    primary = OakRedLight,
-    onPrimary = Color.Black,
-    primaryContainer = OakRedContainerDark,
-    onPrimaryContainer = Color(0xFFFFDAD6),
-    secondary = OakGold,
-    onSecondary = Color.Black,
+    primary = Color(0xFFFFB3B1),
+    onPrimary = Color(0xFF68000F),
+    primaryContainer = Color(0xFF93001D),
+    onPrimaryContainer = Color(0xFFFFDAD8),
+    secondary = Color(0xFFE5BDC0),
+    onSecondary = Color(0xFF43292C),
+    secondaryContainer = Color(0xFF5A3F43),
+    onSecondaryContainer = Color(0xFFFFD9DC),
+    tertiary = Color(0xFFF2BF48),
+    onTertiary = Color(0xFF3F2E00),
+    tertiaryContainer = Color(0xFF5C4300),
+    onTertiaryContainer = Color(0xFFFFDF9A),
     background = OakDarkBackground,
     onBackground = OakTextPrimaryDark,
     surface = OakSurfaceDark,
@@ -26,15 +34,26 @@ private val OakDarkColorScheme = darkColorScheme(
     surfaceVariant = OakSurfaceVariantDark,
     onSurfaceVariant = OakTextSecondaryDark,
     outline = OakOutlineDark,
+    outlineVariant = OakOutlineDark,
+    surfaceContainerLow = OakSurfaceDark,
+    surfaceContainer = OakSurfaceDark,
+    surfaceContainerHigh = OakSurfaceVariantDark,
+    surfaceContainerHighest = Color(0xFF29292F),
 )
 
 private val OakLightColorScheme = lightColorScheme(
     primary = OakRedPrimary,
     onPrimary = Color.White,
-    primaryContainer = OakRedContainerLight,
-    onPrimaryContainer = OakRedDark,
-    secondary = OakGold,
+    primaryContainer = Color(0xFFFFDAD8),
+    onPrimaryContainer = Color(0xFF410006),
+    secondary = Color(0xFF75565A),
     onSecondary = Color.White,
+    secondaryContainer = Color(0xFFF3DEE0),
+    onSecondaryContainer = Color(0xFF2B1517),
+    tertiary = Color(0xFF7A5900),
+    onTertiary = Color.White,
+    tertiaryContainer = Color(0xFFFFDF9A),
+    onTertiaryContainer = Color(0xFF261A00),
     background = OakJournalBackground,
     onBackground = OakTextPrimaryLight,
     surface = OakSurfaceLight,
@@ -42,8 +61,14 @@ private val OakLightColorScheme = lightColorScheme(
     surfaceVariant = OakSurfaceVariantLight,
     onSurfaceVariant = OakTextSecondaryLight,
     outline = OakOutlineLight,
+    outlineVariant = OakOutlineLight,
+    surfaceContainerLow = OakSurfaceLight,
+    surfaceContainer = OakSurfaceLight,
+    surfaceContainerHigh = OakSurfaceVariantLight,
+    surfaceContainerHighest = Color(0xFFE6E6EB),
 )
 
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun OakLogTheme(
     themeMode: ThemeMode = ThemeMode.SYSTEM,
@@ -65,10 +90,12 @@ fun OakLogTheme(
         else -> OakLightColorScheme
     }
 
-    MaterialTheme(
+    MaterialExpressiveTheme(
         colorScheme = colorScheme,
+        motionScheme = MotionScheme.expressive(),
         typography = OakTypography,
         shapes = OakShapes,
         content = content,
     )
 }
+

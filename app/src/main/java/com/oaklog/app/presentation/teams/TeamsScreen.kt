@@ -1,5 +1,6 @@
 package com.oaklog.app.presentation.teams
 
+import com.oaklog.app.presentation.components.Card
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -45,6 +46,8 @@ fun TeamsScreen(
                 },
                 containerColor = MaterialTheme.colorScheme.primary,
                 contentColor = MaterialTheme.colorScheme.onPrimary,
+                elevation = FloatingActionButtonDefaults.elevation(0.dp, 0.dp, 0.dp, 0.dp),
+                shape = RoundedCornerShape(16.dp),
             ) {
                 Icon(Icons.Default.Add, contentDescription = "Create Team")
             }
@@ -208,3 +211,4 @@ private fun TeamCard(
         }
     }
 }
+

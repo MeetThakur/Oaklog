@@ -109,6 +109,8 @@ data class AbilityInfo(
     val description: String?,
     val generation: Int?,
     val pokemon: List<AbilityPokemon>,
+    /** One-sentence effect, suited to inline display next to a species' ability. */
+    val shortDescription: String? = null,
 )
 
 data class AbilityPokemon(val pokemonName: String, val speciesId: Int?, val isHidden: Boolean)
