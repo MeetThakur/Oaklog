@@ -15,7 +15,9 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.oaklog.app.domain.logic.SpeedTierEntry
 import com.oaklog.app.domain.logic.TeamAnalysis
+import com.oaklog.app.domain.logic.TeamSuggestion
 import com.oaklog.app.presentation.components.TypeBadge
 import com.oaklog.app.presentation.theme.PokemonTypeColors
 
@@ -24,6 +26,8 @@ import com.oaklog.app.presentation.theme.PokemonTypeColors
 fun TeamAnalysisView(
     analysis: TeamAnalysis,
     modifier: Modifier = Modifier,
+    suggestions: List<TeamSuggestion> = emptyList(),
+    speedTiers: List<SpeedTierEntry> = emptyList(),
 ) {
     Column(
         modifier = modifier
@@ -31,8 +35,12 @@ fun TeamAnalysisView(
             .padding(16.dp),
         verticalArrangement = Arrangement.spacedBy(16.dp),
     ) {
+        if (suggestions.isNotEmpty()) SuggestionsCard(suggestions)
+        if (speedTiers.isNotEmpty()) SpeedTiersCard(speedTiers)
+
         // Types Represented Card
         Card(
+            modifier = Modifier.fillMaxWidth(),
             shape = RoundedCornerShape(16.dp),
             colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
         ) {
@@ -71,6 +79,7 @@ fun TeamAnalysisView(
         // Shared Weaknesses Alert
         if (analysis.sharedWeaknesses.isNotEmpty()) {
             Card(
+                modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(16.dp),
                 colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.errorContainer.copy(alpha = 0.5f)),
             ) {
@@ -113,6 +122,7 @@ fun TeamAnalysisView(
 
         // Defensive Matchups Summary Table
         Card(
+            modifier = Modifier.fillMaxWidth(),
             shape = RoundedCornerShape(16.dp),
             colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
         ) {
@@ -196,6 +206,7 @@ fun TeamAnalysisView(
 
         // Offensive Coverage Summary
         Card(
+            modifier = Modifier.fillMaxWidth(),
             shape = RoundedCornerShape(16.dp),
             colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
         ) {
@@ -255,3 +266,88 @@ fun TeamAnalysisView(
     }
 }
 
+
+@OptIn(ExperimentalLayoutApi::class)
+@Composable
+private fun SuggestionsCard(suggestions: List<TeamSuggestion>) {
+    Card(shape = RoundedCornerShape(16.dp)) {
+        Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(14.dp)) {
+            Text(
+                text = "Suggestions",
+                style = MaterialTheme.typography.titleMedium,
+                fontWeight = FontWeight.Bold,
+                color = MaterialTheme.colorScheme.onSurface,
+            )
+            suggestions.forEach { tip ->
+                Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                    Text(tip.title, style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.SemiBold)
+                    Text(
+                        tip.detail,
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                    if (tip.suggestedTypes.isNotEmpty()) {
+                        Text(
+                            "Types that help",
+                            style = MaterialTheme.typography.labelSmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        )
+                        FlowRow(
+                            horizontalArrangement = Arrangement.spacedBy(6.dp),
+                            verticalArrangement = Arrangement.spacedBy(6.dp),
+                        ) {
+                            tip.suggestedTypes.forEach { TypeBadge(type = it, small = true) }
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun SpeedTiersCard(tiers: List<SpeedTierEntry>) {
+    val fastest = tiers.maxOf { it.speedL50 }.coerceAtLeast(1)
+    Card(shape = RoundedCornerShape(16.dp)) {
+        Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
+            Text(
+                text = "Speed tiers",
+                style = MaterialTheme.typography.titleMedium,
+                fontWeight = FontWeight.Bold,
+                color = MaterialTheme.colorScheme.onSurface,
+            )
+            Text(
+                text = "Fastest first. Level 50 and 100 with a neutral nature, 31 IVs and no EVs.",
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+            tiers.forEach { t ->
+                Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Text(t.name, modifier = Modifier.weight(1f), fontWeight = FontWeight.SemiBold)
+                        Text(
+                            "base ${t.baseSpeed} · L50 ${t.speedL50} · L100 ${t.speedL100}",
+                            fontSize = 12.sp,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        )
+                    }
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(6.dp)
+                            .clip(RoundedCornerShape(3.dp))
+                            .background(MaterialTheme.colorScheme.surfaceVariant),
+                    ) {
+                        Box(
+                            modifier = Modifier
+                                .fillMaxHeight()
+                                .fillMaxWidth(t.speedL50.toFloat() / fastest)
+                                .clip(RoundedCornerShape(3.dp))
+                                .background(MaterialTheme.colorScheme.primary),
+                        )
+                    }
+                }
+            }
+        }
+    }
+}

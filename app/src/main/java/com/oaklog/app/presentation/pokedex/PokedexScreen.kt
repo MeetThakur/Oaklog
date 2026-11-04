@@ -1,5 +1,6 @@
 package com.oaklog.app.presentation.pokedex
 
+import androidx.compose.material.icons.outlined.SearchOff
 import androidx.compose.foundation.background
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.*
@@ -174,8 +175,9 @@ fun PokedexScreen(
                     }
                     state.pokemonList.isEmpty() -> {
                         EmptyView(
-                            title = "No Pokémon Found",
-                            subtitle = "Try adjusting your search query or filters to explore more species."
+                            title = "No Pokémon found",
+                            subtitle = "Nothing matches the current search and filters. Loosen one of them to see more species.",
+                            icon = Icons.Outlined.SearchOff,
                         )
                     }
                     state.layout == DexLayout.GRID -> {

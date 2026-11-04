@@ -21,6 +21,7 @@ import coil3.compose.AsyncImage
 import com.oaklog.app.domain.logic.NameFormatter
 import com.oaklog.app.domain.model.CollectionEntry
 import com.oaklog.app.domain.model.PokemonSummary
+import com.oaklog.app.presentation.navigation.sharedArtwork
 import com.oaklog.app.presentation.theme.PokemonTypeColors
 
 private fun artworkUrl(id: Int) =
@@ -45,7 +46,7 @@ private fun ArtworkDisc(
         AsyncImage(
             model = artworkUrl(pokemon.id),
             contentDescription = pokemon.name,
-            modifier = Modifier.size(artSize),
+            modifier = Modifier.size(artSize).sharedArtwork(pokemon.id),
             contentScale = ContentScale.Fit,
         )
     }

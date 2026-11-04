@@ -162,6 +162,9 @@ class PokemonRepositoryImpl @Inject constructor(
     private companion object {
         const val HYDRATION_CONCURRENCY = 6
         const val HYDRATION_BATCH = 24
+
+        /** PokéAPI numbers alternate forms from 10001, so anything below is a species. */
+        const val MAX_SPECIES_ID = 9999
     }
 
     private fun generationForId(id: Int): Int = when (id) {
@@ -275,6 +278,9 @@ class PokemonRepositoryImpl @Inject constructor(
                 },
                 dexEntries = dexEntries,
                 evolutionChainId = speciesDto.evolutionChain?.url?.trimEnd('/')?.substringAfterLast('/')?.toIntOrNull(),
+                criesUrl = pokemonDto.cries?.latest ?: pokemonDto.cries?.legacy,
+                femaleSpriteUrl = pokemonDto.sprites.frontFemale,
+                shinyFemaleSpriteUrl = pokemonDto.sprites.frontShinyFemale,
             )
         }
     }
@@ -339,6 +345,11 @@ class PokemonRepositoryImpl @Inject constructor(
                 priority = dto.priority,
                 description = desc?.let { NameFormatter.cleanFlavor(it) },
                 generation = NameFormatter.generationFromSlug(dto.generation?.name),
+                learnedBy = dto.learnedByPokemon.mapNotNull { ref ->
+                    // Alternate forms have ids above the species range and no detail route.
+                    val id = ref.id?.takeIf { it <= MAX_SPECIES_ID } ?: return@mapNotNull null
+                    NamedEntry(id, ref.name)
+                }.sortedBy { it.id },
             )
         }
     }

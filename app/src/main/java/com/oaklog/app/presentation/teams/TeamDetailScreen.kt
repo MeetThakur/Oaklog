@@ -24,6 +24,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil3.compose.AsyncImage
 import com.oaklog.app.domain.logic.NameFormatter
+import com.oaklog.app.domain.logic.SpeedTierEntry
 import com.oaklog.app.domain.model.Team
 import com.oaklog.app.domain.model.TeamMember
 import com.oaklog.app.presentation.components.OakTopBar
@@ -142,7 +143,16 @@ fun TeamDetailScreen(
             // Real-time Team Analysis Section
             val analysis = viewModel.computeAnalysis(team, state.typeChart)
             if (analysis != null && team.members.isNotEmpty()) {
-                TeamAnalysisView(analysis = analysis)
+                // Speed needs each member's detail payload, so it fills in after the type-only cards.
+                val memberKey = team.members.map { it.id to it.pokemonId }
+                val speedTiers by produceState(emptyList<SpeedTierEntry>(), memberKey) {
+                    value = viewModel.speedTiers(team)
+                }
+                TeamAnalysisView(
+                    analysis = analysis,
+                    suggestions = viewModel.suggestions(team, analysis, state.typeChart),
+                    speedTiers = speedTiers,
+                )
             }
         }
     }

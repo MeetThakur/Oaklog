@@ -32,6 +32,17 @@ sealed class Screen(val route: String) {
     data object ItemsDatabase : Screen("explore/items")
     data object Regions : Screen("explore/regions")
     data object Settings : Screen("settings")
+    data object Search : Screen("search")
+    data object Calculator : Screen("explore/calculator")
+
+    /** Both slots are optional; opening from a detail page pre-fills the first. */
+    data object Compare : Screen("compare?a={a}&b={b}") {
+        fun createRoute(a: Int? = null, b: Int? = null): String = buildString {
+            append("compare")
+            val params = listOfNotNull(a?.let { "a=$it" }, b?.let { "b=$it" })
+            if (params.isNotEmpty()) append("?").append(params.joinToString("&"))
+        }
+    }
 }
 
 data class BottomNavItem(

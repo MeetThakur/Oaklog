@@ -49,7 +49,11 @@ data class PokemonDto(
     val moves: List<PokemonMoveDto> = emptyList(),
     val sprites: SpritesDto = SpritesDto(),
     val species: NamedRefDto? = null,
+    val cries: CriesDto? = null,
 )
+
+@Serializable
+data class CriesDto(val latest: String? = null, val legacy: String? = null)
 
 @Serializable
 data class PokemonTypeSlotDto(val slot: Int = 0, val type: NamedRefDto)
@@ -81,6 +85,8 @@ data class MoveVersionDetailDto(
 data class SpritesDto(
     @SerialName("front_default") val frontDefault: String? = null,
     @SerialName("front_shiny") val frontShiny: String? = null,
+    @SerialName("front_female") val frontFemale: String? = null,
+    @SerialName("front_shiny_female") val frontShinyFemale: String? = null,
     val other: OtherSpritesDto? = null,
 )
 

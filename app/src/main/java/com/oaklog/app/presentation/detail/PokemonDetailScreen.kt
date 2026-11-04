@@ -2,7 +2,7 @@ package com.oaklog.app.presentation.detail
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
-import androidx.compose.foundation.isSystemInDarkTheme
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
@@ -13,6 +13,10 @@ import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.AutoAwesome
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.FavoriteBorder
+import androidx.compose.material.icons.filled.Female
+import androidx.compose.material.icons.filled.Male
+import androidx.compose.material.icons.filled.VolumeUp
+import androidx.compose.material.icons.outlined.CompareArrows
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -21,6 +25,8 @@ import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.FilterQuality
+import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -29,6 +35,7 @@ import coil3.compose.AsyncImage
 import com.oaklog.app.domain.logic.NameFormatter
 import com.oaklog.app.presentation.components.*
 import com.oaklog.app.presentation.detail.tabs.*
+import com.oaklog.app.presentation.navigation.sharedArtwork
 import com.oaklog.app.presentation.theme.OakFavoriteRed
 import com.oaklog.app.presentation.theme.OakShinyGold
 import com.oaklog.app.presentation.theme.PokemonTypeColors
@@ -39,10 +46,13 @@ fun PokemonDetailScreen(
     viewModel: PokemonDetailViewModel,
     onNavigateBack: () -> Unit,
     onNavigateToPokemon: (Int) -> Unit,
+    onCompare: (Int) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val state by viewModel.uiState.collectAsState()
     var selectedTabIndex by remember { mutableIntStateOf(0) }
+    var reference by remember { mutableStateOf<ReferenceTarget?>(null) }
+    val playCry = rememberCryPlayer()
     val tabTitles = listOf("Overview", "Stats", "Moves", "Evolution", "Forms", "Location")
 
     Scaffold(
@@ -50,7 +60,26 @@ fun PokemonDetailScreen(
     ) { innerPadding ->
         when {
             state.isLoading && state.detail == null -> {
-                LoadingView(message = "Opening Professor Oak's research journal...")
+                Column(
+                    modifier = Modifier.fillMaxSize().padding(innerPadding),
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.Center,
+                ) {
+                    // Same artwork as the list card, so the shared-element morph has a target at once.
+                    viewModel.initialSpeciesId?.let { id ->
+                        AsyncImage(
+                            model = "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/$id.png",
+                            contentDescription = null,
+                            modifier = Modifier.size(200.dp).sharedArtwork(id),
+                            contentScale = ContentScale.Fit,
+                        )
+                    }
+                    Text(
+                        text = "Opening Professor Oak's research journal...",
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                }
             }
             state.error != null && state.detail == null -> {
                 ErrorView(
@@ -60,12 +89,15 @@ fun PokemonDetailScreen(
             }
             state.detail != null -> {
                 val detail = state.detail!!
-                val isDark = isSystemInDarkTheme()
+                val isDark = MaterialTheme.colorScheme.background.luminance() < 0.5f
                 val typeGradient = PokemonTypeColors.gradient(detail.types)
-                val activeArtwork = if (state.isShiny) {
-                    detail.shinyArtworkUrl ?: detail.artworkUrl
-                } else {
-                    detail.artworkUrl
+                // Official artwork has no female variant; those forms fall back to the in-game sprite.
+                val showFemale = state.isFemale && detail.femaleSpriteUrl != null
+                val activeArtwork = when {
+                    showFemale && state.isShiny -> detail.shinyFemaleSpriteUrl ?: detail.femaleSpriteUrl
+                    showFemale -> detail.femaleSpriteUrl
+                    state.isShiny -> detail.shinyArtworkUrl ?: detail.artworkUrl
+                    else -> detail.artworkUrl
                 }
 
                 Column(
@@ -103,6 +135,18 @@ fun PokemonDetailScreen(
                                 )
                                 Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                                     HeaderIconButton(
+                                        onClick = { onCompare(detail.speciesId) },
+                                        icon = Icons.Outlined.CompareArrows,
+                                        description = "Compare",
+                                    )
+                                    if (detail.femaleSpriteUrl != null) {
+                                        HeaderIconButton(
+                                            onClick = viewModel::toggleFemale,
+                                            icon = if (state.isFemale) Icons.Default.Female else Icons.Default.Male,
+                                            description = if (state.isFemale) "Showing female, tap for male" else "Showing male, tap for female",
+                                        )
+                                    }
+                                    HeaderIconButton(
                                         onClick = viewModel::toggleShiny,
                                         icon = Icons.Default.AutoAwesome,
                                         description = "Toggle Shiny Artwork",
@@ -127,9 +171,21 @@ fun PokemonDetailScreen(
                                 AsyncImage(
                                     model = activeArtwork,
                                     contentDescription = detail.displayName,
-                                    modifier = Modifier.size(200.dp),
+                                    modifier = Modifier
+                                        .size(200.dp)
+                                        .sharedArtwork(detail.speciesId)
+                                        .clickable(enabled = detail.criesUrl != null) { playCry(detail.criesUrl!!) },
                                     contentScale = ContentScale.Fit,
+                                    filterQuality = if (showFemale) FilterQuality.None else FilterQuality.Low,
                                 )
+                                if (detail.criesUrl != null) {
+                                    Icon(
+                                        imageVector = Icons.Default.VolumeUp,
+                                        contentDescription = "Play cry",
+                                        tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                                        modifier = Modifier.align(Alignment.BottomEnd).padding(8.dp).size(20.dp),
+                                    )
+                                }
                             }
 
                             Row(
@@ -199,6 +255,7 @@ fun PokemonDetailScreen(
                             selectedDexVersion = state.selectedDexVersion,
                             onSelectDexVersion = viewModel::selectDexVersion,
                             abilityInfo = state.abilityInfo,
+                            onAbilityClick = { reference = ReferenceTarget.Ability(it) },
                         )
                         1 -> StatsTab(detail = detail)
                         2 -> MovesTab(
@@ -209,6 +266,7 @@ fun PokemonDetailScreen(
                             onSelectVersionGroup = viewModel::selectMoveVersionGroup,
                             onSelectMethod = viewModel::selectMoveMethod,
                             onExpandMove = viewModel::loadMove,
+                            onOpenMove = { reference = ReferenceTarget.Move(it) },
                         )
                         3 -> EvolutionTab(
                             evolutionRoot = state.evolutionRoot,
@@ -230,8 +288,15 @@ fun PokemonDetailScreen(
             }
         }
     }
-}
 
+    reference?.let { target ->
+        ReferenceSheet(
+            target = target,
+            onDismiss = { reference = null },
+            onOpenPokemon = onNavigateToPokemon,
+        )
+    }
+}
 
 @Composable
 private fun HeaderIconButton(

@@ -9,6 +9,9 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowForward
 import androidx.compose.material.icons.filled.AutoAwesome
+import androidx.compose.material.icons.filled.Calculate
+import androidx.compose.material.icons.filled.CompareArrows
+import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Explore
 import androidx.compose.material.icons.filled.FlashOn
 import androidx.compose.material.icons.filled.Inventory2
@@ -31,11 +34,14 @@ import com.oaklog.app.presentation.components.OakTopBar
 @Composable
 fun ExploreScreen(
     viewModel: ExploreViewModel,
+    onNavigateToSearch: () -> Unit,
     onNavigateToTypeChart: () -> Unit,
     onNavigateToMoves: () -> Unit,
     onNavigateToAbilities: () -> Unit,
     onNavigateToItems: () -> Unit,
     onNavigateToRegions: () -> Unit,
+    onNavigateToCompare: () -> Unit,
+    onNavigateToCalculator: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     Scaffold(
@@ -52,6 +58,22 @@ fun ExploreScreen(
                 .padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(10.dp),
         ) {
+            SearchEntry(onClick = onNavigateToSearch)
+
+            ExploreToolCard(
+                title = "Compare Pokémon",
+                description = "Stats, typing, size and abilities side by side.",
+                icon = Icons.Default.CompareArrows,
+                onClick = onNavigateToCompare,
+            )
+
+            ExploreToolCard(
+                title = "Stat & Damage Calculator",
+                description = "Stats by level, nature, IVs and EVs, plus damage estimates.",
+                icon = Icons.Default.Calculate,
+                onClick = onNavigateToCalculator,
+            )
+
             ExploreToolCard(
                 title = "Interactive Type Chart",
                 description = "Damage multipliers for any single or dual typing.",
@@ -85,6 +107,31 @@ fun ExploreScreen(
                 description = "Kanto to Paldea, with regional Pokédex rosters.",
                 icon = Icons.Default.Map,
                 onClick = onNavigateToRegions,
+            )
+        }
+    }
+}
+
+/** Looks like a search field but opens the full search screen, which owns the keyboard. */
+@Composable
+private fun SearchEntry(onClick: () -> Unit) {
+    Surface(
+        onClick = onClick,
+        shape = RoundedCornerShape(28.dp),
+        color = MaterialTheme.colorScheme.surface,
+        border = androidx.compose.foundation.BorderStroke(1.dp, MaterialTheme.colorScheme.outline),
+        modifier = Modifier.fillMaxWidth().height(56.dp),
+    ) {
+        Row(
+            modifier = Modifier.padding(horizontal = 18.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(12.dp),
+        ) {
+            Icon(Icons.Default.Search, contentDescription = null, tint = MaterialTheme.colorScheme.onSurfaceVariant)
+            Text(
+                "Search Pokémon, moves, abilities, items",
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
         }
     }

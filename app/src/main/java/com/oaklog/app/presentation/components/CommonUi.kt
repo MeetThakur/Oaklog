@@ -19,6 +19,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -96,11 +97,18 @@ fun ErrorView(
     }
 }
 
+/**
+ * Empty state with a tonal icon, a short explanation and an optional single action.
+ * Callers pass an icon that names the thing that's missing, not a generic placeholder.
+ */
 @Composable
 fun EmptyView(
     title: String,
     subtitle: String,
     modifier: Modifier = Modifier,
+    icon: ImageVector? = null,
+    actionLabel: String? = null,
+    onAction: (() -> Unit)? = null,
 ) {
     Box(
         modifier = modifier
@@ -112,6 +120,23 @@ fun EmptyView(
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.spacedBy(8.dp),
         ) {
+            if (icon != null) {
+                Box(
+                    modifier = Modifier
+                        .size(72.dp)
+                        .clip(CircleShape)
+                        .background(MaterialTheme.colorScheme.secondaryContainer),
+                    contentAlignment = Alignment.Center,
+                ) {
+                    Icon(
+                        imageVector = icon,
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.onSecondaryContainer,
+                        modifier = Modifier.size(32.dp),
+                    )
+                }
+                Spacer(Modifier.height(8.dp))
+            }
             Text(
                 text = title,
                 style = MaterialTheme.typography.titleMedium,
@@ -125,6 +150,10 @@ fun EmptyView(
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 textAlign = TextAlign.Center,
             )
+            if (actionLabel != null && onAction != null) {
+                Spacer(Modifier.height(12.dp))
+                FilledTonalButton(onClick = onAction) { Text(actionLabel) }
+            }
         }
     }
 }

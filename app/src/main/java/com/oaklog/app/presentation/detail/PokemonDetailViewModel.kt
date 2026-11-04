@@ -24,6 +24,7 @@ data class PokemonDetailUiState(
     val collectionEntry: CollectionEntry? = null,
     val selectedVarietyName: String? = null,
     val isShiny: Boolean = false,
+    val isFemale: Boolean = false,
     val selectedDexVersion: String? = null,
     val selectedEncounterVersion: String? = null,
     val selectedMoveVersionGroup: String? = null,
@@ -41,6 +42,9 @@ class PokemonDetailViewModel @Inject constructor(
 ) : ViewModel() {
 
     private val pokemonIdArg: String = checkNotNull(savedStateHandle["pokemonId"])
+
+    /** Known from the route, so the header can show the artwork a list card is morphing from. */
+    val initialSpeciesId: Int? = pokemonIdArg.toIntOrNull()
 
     private val _uiState = MutableStateFlow(PokemonDetailUiState(isLoading = true))
     val uiState: StateFlow<PokemonDetailUiState> = _uiState.asStateFlow()
@@ -126,6 +130,10 @@ class PokemonDetailViewModel @Inject constructor(
 
     fun toggleShiny() {
         _uiState.update { it.copy(isShiny = !it.isShiny) }
+    }
+
+    fun toggleFemale() {
+        _uiState.update { it.copy(isFemale = !it.isFemale) }
     }
 
     fun selectVariety(varietyName: String) {

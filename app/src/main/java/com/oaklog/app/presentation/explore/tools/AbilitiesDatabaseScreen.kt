@@ -28,6 +28,7 @@ fun AbilitiesDatabaseScreen(
     onSearch: (String) -> Unit,
     onInit: () -> Unit,
     onNavigateBack: () -> Unit,
+    onPokemonClick: (Int) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     var query by remember { mutableStateOf("") }
@@ -150,6 +151,8 @@ fun AbilitiesDatabaseScreen(
                                                 Surface(
                                                     shape = RoundedCornerShape(6.dp),
                                                     color = MaterialTheme.colorScheme.surfaceVariant,
+                                                    onClick = { p.speciesId?.takeIf { it < 10000 }?.let(onPokemonClick) },
+                                                    enabled = p.speciesId != null && p.speciesId < 10000,
                                                 ) {
                                                     Text(
                                                         text = NameFormatter.pretty(p.pokemonName),

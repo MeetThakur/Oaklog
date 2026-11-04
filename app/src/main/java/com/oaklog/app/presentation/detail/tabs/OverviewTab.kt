@@ -4,6 +4,7 @@ import com.oaklog.app.presentation.components.Card
 import com.oaklog.app.presentation.components.FilterChip
 import androidx.compose.foundation.background
 import androidx.compose.foundation.horizontalScroll
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -29,6 +30,7 @@ fun OverviewTab(
     selectedDexVersion: String?,
     onSelectDexVersion: (String) -> Unit,
     abilityInfo: Map<String, AbilityInfo> = emptyMap(),
+    onAbilityClick: (String) -> Unit = {},
     modifier: Modifier = Modifier,
 ) {
     Column(
@@ -142,7 +144,7 @@ fun OverviewTab(
                         )
                     }
                     Row(
-                        modifier = Modifier.fillMaxWidth(),
+                        modifier = Modifier.fillMaxWidth().clickable { onAbilityClick(ability.name) },
                         verticalAlignment = Alignment.CenterVertically,
                         horizontalArrangement = Arrangement.SpaceBetween,
                     ) {
@@ -174,6 +176,7 @@ fun OverviewTab(
                             style = MaterialTheme.typography.bodySmall,
                             color = MaterialTheme.colorScheme.onSurfaceVariant,
                             lineHeight = 18.sp,
+                            modifier = Modifier.clickable { onAbilityClick(ability.name) },
                         )
                     } else {
                         Text(

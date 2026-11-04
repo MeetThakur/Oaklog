@@ -1,5 +1,6 @@
 package com.oaklog.app.presentation.teams
 
+import androidx.compose.material.icons.outlined.Groups
 import com.oaklog.app.presentation.components.Card
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -61,8 +62,14 @@ fun TeamsScreen(
         ) {
             if (state.teams.isEmpty()) {
                 EmptyView(
-                    title = "No Teams Created Yet",
-                    subtitle = "Tap the + button to build a Pokémon team and analyze defensive matchups, weaknesses, and type coverage.",
+                    title = "Build your first team",
+                    subtitle = "Pick up to six Pokémon, then see shared weaknesses, coverage gaps and speed tiers.",
+                    icon = Icons.Outlined.Groups,
+                    actionLabel = "Create a team",
+                    onAction = {
+                        newTeamName = "Research Team ${state.teams.size + 1}"
+                        showCreateDialog = true
+                    },
                 )
             } else {
                 LazyColumn(

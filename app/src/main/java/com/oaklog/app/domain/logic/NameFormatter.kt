@@ -21,7 +21,8 @@ object NameFormatter {
 
     fun pretty(slug: String): String {
         special[slug]?.let { return it }
-        return slug.split('-').joinToString(" ") { part -> part.replaceFirstChar { it.uppercaseChar() } }
+        return slug.split('-').filter { it.isNotEmpty() }
+            .joinToString(" ") { part -> part.replaceFirstChar { it.uppercaseChar() } }
     }
 
     fun dexNumber(id: Int): String = "#" + id.toString().padStart(4, '0')

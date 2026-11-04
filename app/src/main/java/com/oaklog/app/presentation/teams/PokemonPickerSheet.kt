@@ -29,6 +29,7 @@ fun PokemonPickerSheet(
     pokemonList: List<PokemonSummary>,
     onSelectPokemon: (PokemonSummary) -> Unit,
     onDismiss: () -> Unit,
+    title: String = "Add Team Member",
 ) {
     var searchQuery by remember { mutableStateOf("") }
 
@@ -54,7 +55,7 @@ fun PokemonPickerSheet(
                 .padding(horizontal = 16.dp),
         ) {
             Text(
-                text = "Add Team Member",
+                text = title,
                 style = MaterialTheme.typography.titleLarge,
                 fontWeight = FontWeight.Bold,
             )

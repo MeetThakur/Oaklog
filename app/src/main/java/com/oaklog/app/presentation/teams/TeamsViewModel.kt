@@ -3,7 +3,10 @@ package com.oaklog.app.presentation.teams
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.oaklog.app.domain.logic.TeamAnalysis
+import com.oaklog.app.domain.logic.SpeedTierEntry
 import com.oaklog.app.domain.logic.TeamAnalyzer
+import com.oaklog.app.domain.logic.TeamSuggestion
+import com.oaklog.app.domain.logic.TeamSuggestions
 import com.oaklog.app.domain.logic.TypeChart
 import com.oaklog.app.domain.model.PokemonSummary
 import com.oaklog.app.domain.model.Team
@@ -104,6 +107,21 @@ class TeamsViewModel @Inject constructor(
         viewModelScope.launch {
             teamRepo.removeMember(memberId)
         }
+    }
+
+    /** Base Speed per member, from cached detail payloads; members that fail to load are skipped. */
+    suspend fun speedTiers(team: Team): List<SpeedTierEntry> {
+        val speeds = team.members.mapNotNull { m ->
+            pokemonRepo.getPokemonDetail(m.pokemonId.toString()).getOrNull()?.let { d ->
+                (m.nickname?.takeIf { it.isNotBlank() } ?: d.displayName) to d.baseStat("speed")
+            }
+        }
+        return TeamSuggestions.speedTiers(speeds)
+    }
+
+    fun suggestions(team: Team, analysis: TeamAnalysis, chart: TypeChart?): List<TeamSuggestion> {
+        val tc = chart ?: _typeChart.value ?: return emptyList()
+        return TeamSuggestions.generate(tc, analysis, team.members.size)
     }
 
     fun computeAnalysis(team: Team, chart: TypeChart?): TeamAnalysis? {

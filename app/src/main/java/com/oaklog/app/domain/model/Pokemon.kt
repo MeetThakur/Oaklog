@@ -62,7 +62,13 @@ data class PokemonDetail(
     val varieties: List<PokemonVariety>,
     val dexEntries: List<PokedexEntryText>,
     val evolutionChainId: Int?,
+    /** Audio clip URL (Ogg), or null when PokéAPI has none for this form. */
+    val criesUrl: String? = null,
+    /** Present only when the female looks different from the male. */
+    val femaleSpriteUrl: String? = null,
+    val shinyFemaleSpriteUrl: String? = null,
 ) {
+    fun baseStat(key: String): Int = stats.firstOrNull { it.key == key }?.value ?: 0
     val baseStatTotal: Int get() = stats.sumOf { it.value }
 }
 
@@ -90,6 +96,8 @@ data class MoveInfo(
     val priority: Int,
     val description: String?,
     val generation: Int?,
+    /** Species that can learn this move (default forms only), for the full move entry. */
+    val learnedBy: List<NamedEntry> = emptyList(),
 )
 
 data class LearnEntry(

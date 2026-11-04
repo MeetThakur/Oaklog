@@ -1,5 +1,12 @@
 package com.oaklog.app.presentation.collection
 
+import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.material.icons.outlined.Visibility
+import androidx.compose.material.icons.outlined.AutoAwesome
+import androidx.compose.material.icons.outlined.FavoriteBorder
+import androidx.compose.material.icons.outlined.EmojiEvents
+import androidx.compose.material.icons.outlined.CatchingPokemon
+import androidx.compose.material.icons.Icons
 import com.oaklog.app.presentation.components.Card
 import com.oaklog.app.presentation.components.FilterChip
 import androidx.compose.foundation.background
@@ -32,6 +39,7 @@ import com.oaklog.app.presentation.theme.OakShinyGold
 fun CollectionScreen(
     viewModel: CollectionViewModel,
     onPokemonClick: (Int) -> Unit,
+    onBrowsePokedex: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val state by viewModel.uiState.collectAsState()
@@ -175,9 +183,13 @@ fun CollectionScreen(
             // Grid of Pokémon
             Box(modifier = Modifier.weight(1f)) {
                 if (state.displayList.isEmpty()) {
+                    val empty = emptyContent(state.activeTab, state.selectedGen)
                     EmptyView(
-                        title = "No Pokémon In This Category",
-                        subtitle = "Update your collection statuses in the Pokédex to track your catches and favorites here.",
+                        title = empty.title,
+                        subtitle = empty.subtitle,
+                        icon = empty.icon,
+                        actionLabel = if (empty.browse) "Browse the Pokédex" else null,
+                        onAction = if (empty.browse) onBrowsePokedex else null,
                     )
                 } else {
                     LazyVerticalGrid(
@@ -224,3 +236,49 @@ private fun CollectionMetric(
     }
 }
 
+
+private data class EmptyContent(
+    val title: String,
+    val subtitle: String,
+    val icon: ImageVector,
+    /** Whether the Pokédex is where the user fixes this (as opposed to it being a good thing). */
+    val browse: Boolean = true,
+)
+
+/** What an empty tab means differs: "Uncaught" being empty is an achievement, not a gap. */
+private fun emptyContent(tab: CollectionFilterTab, gen: Int?): EmptyContent {
+    val scope = gen?.let { " in Generation $it" }.orEmpty()
+    return when (tab) {
+        CollectionFilterTab.CAUGHT -> EmptyContent(
+            "Nothing caught$scope yet",
+            "Mark a Pokémon as caught from its card or detail page and it will appear here.",
+            Icons.Outlined.CatchingPokemon,
+        )
+        CollectionFilterTab.SEEN -> EmptyContent(
+            "No sightings logged$scope",
+            "Tap the status dot on a Pokémon to mark it as seen.",
+            Icons.Outlined.Visibility,
+        )
+        CollectionFilterTab.UNCAUGHT -> EmptyContent(
+            "All caught$scope",
+            "There's nothing left to catch here. Nicely done.",
+            Icons.Outlined.EmojiEvents,
+            browse = false,
+        )
+        CollectionFilterTab.SHINIES -> EmptyContent(
+            "No shinies$scope yet",
+            "Shiny catches you log will be collected here.",
+            Icons.Outlined.AutoAwesome,
+        )
+        CollectionFilterTab.FAVORITES -> EmptyContent(
+            "No favorites$scope yet",
+            "Tap the heart on any Pokémon to keep it close.",
+            Icons.Outlined.FavoriteBorder,
+        )
+        CollectionFilterTab.ALL -> EmptyContent(
+            "Nothing here$scope",
+            "Try another generation, or browse the Pokédex.",
+            Icons.Outlined.CatchingPokemon,
+        )
+    }
+}

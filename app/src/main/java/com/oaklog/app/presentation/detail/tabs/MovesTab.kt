@@ -33,6 +33,7 @@ fun MovesTab(
     onSelectVersionGroup: (String) -> Unit,
     onSelectMethod: (String) -> Unit,
     onExpandMove: (String) -> Unit,
+    onOpenMove: (String) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     Column(
@@ -92,6 +93,7 @@ fun MovesTab(
                         showLevel = method == "level-up",
                         info = moveDetails[entry.moveName],
                         onExpand = { onExpandMove(entry.moveName) },
+                        onOpen = { onOpenMove(entry.moveName) },
                     )
                 }
             }
@@ -105,6 +107,7 @@ private fun MoveRow(
     showLevel: Boolean,
     info: MoveInfo?,
     onExpand: () -> Unit,
+    onOpen: () -> Unit,
 ) {
     var expanded by remember { mutableStateOf(false) }
     Column(
@@ -178,6 +181,9 @@ private fun MoveRow(
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                         lineHeight = 18.sp,
                     )
+                }
+                TextButton(onClick = onOpen, contentPadding = PaddingValues(0.dp)) {
+                    Text("Full entry and who learns it")
                 }
             }
         }
