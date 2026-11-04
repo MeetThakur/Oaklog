@@ -121,6 +121,12 @@ class TeamsViewModel @Inject constructor(
         }
     }
 
+    fun reorderMembers(teamId: Long, memberIds: List<Long>) {
+        viewModelScope.launch {
+            teamRepo.reorderMembers(teamId, memberIds)
+        }
+    }
+
     /** Base Speed per member, from cached detail payloads; members that fail to load are skipped. */
     suspend fun speedTiers(team: Team): List<SpeedTierEntry> {
         val speeds = team.members.mapNotNull { m ->
