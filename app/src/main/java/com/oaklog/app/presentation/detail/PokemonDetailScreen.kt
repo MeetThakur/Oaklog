@@ -115,118 +115,61 @@ fun PokemonDetailScreen(
                     // Header painted in the Pokémon's type color. The artwork steps out of it and over
                     // the rounded content sheet below.
                     val tint = typeTint(detail.types.firstOrNull())
-                    Box(modifier = Modifier.fillMaxWidth()) {
-                        Column(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .background(tint.container)
-                                .statusBarsPadding()
-                                .padding(horizontal = 16.dp)
-                                .padding(top = 8.dp),
+                    Column(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .statusBarsPadding()
+                            .padding(horizontal = 16.dp)
+                            .padding(top = 8.dp),
+                    ) {
+                        // Quiet icon chips on the page, like every other screen's back button.
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically,
                         ) {
-                            Row(
-                                modifier = Modifier.fillMaxWidth(),
-                                horizontalArrangement = Arrangement.SpaceBetween,
-                                verticalAlignment = Alignment.CenterVertically,
-                            ) {
+                            HeaderIconButton(onClick = onNavigateBack, icon = Icons.AutoMirrored.Filled.ArrowBack, description = "Back")
+                            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                                 HeaderIconButton(
-                                    onClick = onNavigateBack,
-                                    icon = Icons.AutoMirrored.Filled.ArrowBack,
-                                    description = "Back",
-                                    tint = tint,
+                                    onClick = { onCompare(detail.speciesId) },
+                                    icon = Icons.AutoMirrored.Outlined.CompareArrows,
+                                    description = "Compare",
                                 )
-                                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                                if (detail.femaleSpriteUrl != null) {
                                     HeaderIconButton(
-                                        onClick = { onCompare(detail.speciesId) },
-                                        icon = Icons.AutoMirrored.Outlined.CompareArrows,
-                                        description = "Compare",
-                                        tint = tint,
-                                    )
-                                    if (detail.femaleSpriteUrl != null) {
-                                        HeaderIconButton(
-                                            onClick = viewModel::toggleFemale,
-                                            icon = if (state.isFemale) Icons.Default.Female else Icons.Default.Male,
-                                            description = if (state.isFemale) "Showing female, tap for male" else "Showing male, tap for female",
-                                            tint = tint,
-                                        )
-                                    }
-                                    HeaderIconButton(
-                                        onClick = viewModel::toggleShiny,
-                                        icon = Icons.Default.AutoAwesome,
-                                        description = "Toggle Shiny Artwork",
-                                        tint = tint,
-                                        iconColor = if (state.isShiny) OakShinyGold else tint.onContainer,
-                                    )
-                                    val isFav = state.collectionEntry?.favorite == true
-                                    HeaderIconButton(
-                                        onClick = viewModel::toggleFavorite,
-                                        icon = if (isFav) Icons.Filled.Favorite else Icons.Filled.FavoriteBorder,
-                                        description = "Favorite",
-                                        tint = tint,
-                                        iconColor = if (isFav) OakFavoriteRed else tint.onContainer,
+                                        onClick = viewModel::toggleFemale,
+                                        icon = if (state.isFemale) Icons.Default.Female else Icons.Default.Male,
+                                        description = if (state.isFemale) "Showing female, tap for male" else "Showing male, tap for female",
                                     )
                                 }
-                            }
-
-                            Spacer(Modifier.height(10.dp))
-
-                            Row(
-                                modifier = Modifier.fillMaxWidth(),
-                                horizontalArrangement = Arrangement.SpaceBetween,
-                                verticalAlignment = Alignment.Top,
-                            ) {
-                                Column(modifier = Modifier.weight(1f)) {
-                                    Text(
-                                        text = NameFormatter.dexNumber(detail.speciesId),
-                                        style = MaterialTheme.typography.labelMedium,
-                                        color = tint.onContainer.copy(alpha = 0.7f),
-                                    )
-                                    Text(
-                                        text = detail.displayName,
-                                        style = MaterialTheme.typography.headlineLarge,
-                                        color = tint.onContainer,
-                                    )
-                                    detail.genus?.let {
-                                        Text(
-                                            text = it,
-                                            style = MaterialTheme.typography.bodyMedium,
-                                            color = tint.onContainer.copy(alpha = 0.75f),
-                                        )
-                                    }
-                                    Spacer(Modifier.height(10.dp))
-                                    Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-                                        detail.types.forEach { TypeBadge(type = it, onTint = tint) }
-                                    }
-                                }
-                                CollectionStatusButton(
-                                    entry = state.collectionEntry,
-                                    onCycleStatus = viewModel::cycleCollectionStatus,
-                                    tint = tint,
+                                HeaderIconButton(
+                                    onClick = viewModel::toggleShiny,
+                                    icon = Icons.Default.AutoAwesome,
+                                    description = "Toggle Shiny Artwork",
+                                    iconColor = if (state.isShiny) OakShinyGold else MaterialTheme.colorScheme.onSurface,
+                                )
+                                val isFav = state.collectionEntry?.favorite == true
+                                HeaderIconButton(
+                                    onClick = viewModel::toggleFavorite,
+                                    icon = if (isFav) Icons.Filled.Favorite else Icons.Filled.FavoriteBorder,
+                                    description = "Favorite",
+                                    iconColor = if (isFav) OakFavoriteRed else MaterialTheme.colorScheme.onSurface,
                                 )
                             }
-
-                            // Room for the artwork to rise into.
-                            Spacer(Modifier.height(156.dp))
                         }
 
-                        // The sheet's rounded top edge, drawn over the bottom of the header.
-                        Box(
-                            Modifier
-                                .align(Alignment.BottomCenter)
-                                .fillMaxWidth()
-                                .height(28.dp)
-                                .background(MaterialTheme.colorScheme.background, SheetShape),
-                        )
+                        Spacer(Modifier.height(14.dp))
 
+                        // The stage: the artwork on a faint wash of its type, number and cry in the corners.
                         Box(
                             modifier = Modifier
-                                .align(Alignment.BottomCenter)
-                                .offset(y = 84.dp)
-                                .zIndex(1f)
-                                .size(236.dp),
+                                .fillMaxWidth()
+                                .height(264.dp)
+                                .clip(RoundedCornerShape(28.dp))
+                                .background(tint.container),
                             contentAlignment = Alignment.Center,
                         ) {
-                            Box(Modifier.size(206.dp).clip(CircleShape).background(tint.art))
+                            Box(Modifier.size(214.dp).clip(CircleShape).background(tint.art.copy(alpha = 0.55f)))
                             AsyncImage(
                                 model = activeArtwork,
                                 contentDescription = detail.displayName,
@@ -237,17 +180,65 @@ fun PokemonDetailScreen(
                                 contentScale = ContentScale.Fit,
                                 filterQuality = if (showFemale) FilterQuality.None else FilterQuality.Low,
                             )
+                            Text(
+                                text = "%03d".format(detail.speciesId),
+                                style = MaterialTheme.typography.labelLarge,
+                                color = tint.onContainer.copy(alpha = 0.75f),
+                                modifier = Modifier.align(Alignment.TopStart).padding(18.dp),
+                            )
                             if (detail.criesUrl != null) {
                                 Icon(
                                     imageVector = Icons.AutoMirrored.Filled.VolumeUp,
                                     contentDescription = "Play cry",
-                                    tint = tint.onContainer.copy(alpha = 0.8f),
-                                    modifier = Modifier.align(Alignment.BottomEnd).padding(10.dp).size(20.dp),
+                                    tint = tint.onContainer.copy(alpha = 0.75f),
+                                    modifier = Modifier.align(Alignment.BottomEnd).padding(18.dp).size(20.dp),
                                 )
                             }
                         }
+
+                        Spacer(Modifier.height(16.dp))
+
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.Top,
+                        ) {
+                            Column(modifier = Modifier.weight(1f)) {
+                                Text(
+                                    text = detail.displayName,
+                                    style = MaterialTheme.typography.headlineLarge,
+                                    color = MaterialTheme.colorScheme.onSurface,
+                                )
+                                detail.genus?.let {
+                                    Text(
+                                        text = it,
+                                        style = MaterialTheme.typography.bodyMedium,
+                                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                    )
+                                }
+                                Spacer(Modifier.height(10.dp))
+                                // Type as a dot and a word: the accent color of the page.
+                                Row(horizontalArrangement = Arrangement.spacedBy(14.dp), verticalAlignment = Alignment.CenterVertically) {
+                                    detail.types.forEach { type ->
+                                        Row(verticalAlignment = Alignment.CenterVertically) {
+                                            Box(Modifier.size(9.dp).clip(CircleShape).background(PokemonTypeColors.color(type)))
+                                            Spacer(Modifier.width(6.dp))
+                                            Text(
+                                                text = type.replaceFirstChar { it.uppercase() },
+                                                style = MaterialTheme.typography.labelLarge,
+                                                color = MaterialTheme.colorScheme.onSurface,
+                                            )
+                                        }
+                                    }
+                                }
+                            }
+                            CollectionStatusButton(
+                                entry = state.collectionEntry,
+                                onCycleStatus = viewModel::cycleCollectionStatus,
+                            )
+                        }
                     }
-                    Spacer(Modifier.height(84.dp))
+                    Spacer(Modifier.height(16.dp))
 
                     PrimaryScrollableTabRow(
                         selectedTabIndex = selectedTabIndex,
@@ -334,15 +325,14 @@ private fun HeaderIconButton(
     onClick: () -> Unit,
     icon: androidx.compose.ui.graphics.vector.ImageVector,
     description: String,
-    tint: TypeTint,
-    iconColor: Color = tint.onContainer,
+    iconColor: Color = MaterialTheme.colorScheme.onSurface,
 ) {
     IconButton(
         onClick = onClick,
         modifier = Modifier
-            .size(44.dp)
+            .size(42.dp)
             .clip(CircleShape)
-            .background(tint.chip),
+            .background(MaterialTheme.colorScheme.surfaceVariant),
     ) {
         Icon(imageVector = icon, contentDescription = description, tint = iconColor, modifier = Modifier.size(20.dp))
     }

@@ -64,50 +64,49 @@ fun DatabasePage(
 ) {
     val tint = typeTint(color)
     Column(modifier = modifier.fillMaxSize().background(MaterialTheme.colorScheme.background).navigationBarsPadding()) {
-        // Header
-        Box(
+        // Header: quiet like the Pokédex. A back chip and a small tinted icon chip, then overline and title.
+        Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .clip(RoundedCornerShape(bottomStart = 32.dp, bottomEnd = 32.dp))
-                .background(tint.container),
+                .statusBarsPadding()
+                .padding(horizontal = 16.dp)
+                .padding(top = 8.dp, bottom = if (compact) 6.dp else 10.dp),
         ) {
-            // Oversized disc and icon bleeding off the corner, echoing the Pokédex cards.
-            Box(
-                Modifier
-                    .align(Alignment.TopEnd)
-                    .offset(x = 48.dp, y = (-24).dp)
-                    .size(if (compact) 150.dp else 190.dp)
-                    .clip(CircleShape)
-                    .background(tint.art),
-            )
-            Icon(
-                imageVector = icon,
-                contentDescription = null,
-                tint = tint.onContainer.copy(alpha = 0.55f),
-                modifier = Modifier.align(Alignment.TopEnd).padding(top = if (compact) 48.dp else 64.dp, end = 36.dp).size(if (compact) 44.dp else 56.dp),
-            )
-            Column(
-                modifier = Modifier.statusBarsPadding().padding(horizontal = 16.dp).padding(top = 4.dp, bottom = if (compact) 14.dp else 22.dp),
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically,
             ) {
                 IconButton(
                     onClick = onNavigateBack,
-                    modifier = Modifier.size(44.dp).clip(CircleShape).background(tint.chip),
+                    modifier = Modifier.size(42.dp).clip(CircleShape).background(MaterialTheme.colorScheme.surfaceVariant),
                 ) {
-                    Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back", tint = tint.onContainer)
+                    Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
                 }
+                Box(
+                    modifier = Modifier.size(42.dp).clip(CircleShape).background(tint.container),
+                    contentAlignment = Alignment.Center,
+                ) {
+                    Icon(icon, contentDescription = null, tint = tint.onContainer, modifier = Modifier.size(22.dp))
+                }
+            }
+            Text(
+                text = "EXPLORE",
+                style = MaterialTheme.typography.labelSmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier.padding(top = if (compact) 10.dp else 16.dp),
+            )
+            Text(
+                text = title,
+                style = MaterialTheme.typography.headlineMedium,
+                color = MaterialTheme.colorScheme.onSurface,
+            )
+            if (subtitle != null && !compact) {
                 Text(
-                    text = title,
-                    style = MaterialTheme.typography.headlineLarge,
-                    color = tint.onContainer,
-                    modifier = Modifier.padding(top = if (compact) 10.dp else 18.dp),
+                    text = subtitle,
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
-                if (subtitle != null && !compact) {
-                    Text(
-                        text = subtitle,
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = tint.onContainer.copy(alpha = 0.8f),
-                    )
-                }
             }
         }
 

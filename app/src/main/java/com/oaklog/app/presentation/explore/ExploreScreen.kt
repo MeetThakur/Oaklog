@@ -2,6 +2,7 @@ package com.oaklog.app.presentation.explore
 
 import com.oaklog.app.presentation.components.SleekHeader
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -140,30 +141,29 @@ private fun SearchEntry(onClick: () -> Unit) {
 @Composable
 private fun ToolTile(tool: Tool, modifier: Modifier = Modifier) {
     val tint = typeTint(tool.color)
-    Box(
+    val shape = CardShape
+    Column(
         modifier = modifier
             .height(132.dp)
-            .clip(CardShape)
-            .background(tint.container)
-            .clickable(onClick = tool.onClick),
+            .clip(shape)
+            .background(MaterialTheme.colorScheme.surface)
+            .border(0.5.dp, MaterialTheme.colorScheme.outline, shape)
+            .clickable(onClick = tool.onClick)
+            .padding(14.dp),
+        verticalArrangement = Arrangement.SpaceBetween,
     ) {
         Box(
-            Modifier
-                .align(Alignment.TopStart)
-                .padding(14.dp)
-                .size(40.dp)
-                .clip(CircleShape)
-                .background(tint.chip),
+            Modifier.size(40.dp).clip(CircleShape).background(tint.container),
             contentAlignment = Alignment.Center,
         ) {
             Icon(tool.icon, contentDescription = null, tint = tint.onContainer, modifier = Modifier.size(22.dp))
         }
-        Column(Modifier.align(Alignment.BottomStart).padding(14.dp)) {
-            Text(tool.title, style = MaterialTheme.typography.titleMedium, color = tint.onContainer)
+        Column {
+            Text(tool.title, style = MaterialTheme.typography.titleMedium, color = MaterialTheme.colorScheme.onSurface)
             Text(
                 tool.description,
                 style = MaterialTheme.typography.bodySmall,
-                color = tint.onContainer.copy(alpha = 0.75f),
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
         }
     }
