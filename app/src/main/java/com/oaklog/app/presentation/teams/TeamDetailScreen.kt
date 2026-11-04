@@ -24,6 +24,12 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil3.compose.AsyncImage
 import com.oaklog.app.domain.logic.NameFormatter
+import com.oaklog.app.presentation.theme.typeTint
+import com.oaklog.app.presentation.theme.CardShape
+import com.oaklog.app.domain.model.MoveInfo
+import androidx.compose.foundation.layout.FlowRow
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.shape.CircleShape
 import com.oaklog.app.domain.logic.SpeedTierEntry
 import com.oaklog.app.domain.model.Team
 import com.oaklog.app.domain.model.TeamMember
@@ -102,8 +108,8 @@ fun TeamDetailScreen(
                 team.members.forEach { member ->
                     TeamMemberCard(
                         member = member,
+                        loadMove = viewModel::moveInfo,
                         onEdit = { editingMember = member },
-                        onRemove = { viewModel.removeMember(member.id) },
                     )
                 }
 
@@ -168,10 +174,21 @@ fun TeamDetailScreen(
     }
 
     editingMember?.let { member ->
-        EditMemberDialog(
+        // Pair a "finished loading" flag with the result so a failure is distinguishable from loading.
+        val loaded by produceState(false to (null as MemberOptions?), member.id) {
+            value = true to viewModel.memberOptions(member)
+        }
+        MemberEditorSheet(
             member = member,
+            options = loaded.second,
+            optionsFailed = loaded.first && loaded.second == null,
+            loadMove = viewModel::moveInfo,
             onSave = { updated ->
                 viewModel.updateMember(updated)
+                editingMember = null
+            },
+            onRemove = {
+                viewModel.removeMember(member.id)
                 editingMember = null
             },
             onDismiss = { editingMember = null },
@@ -207,158 +224,87 @@ fun TeamDetailScreen(
     }
 }
 
+/**
+ * A member in its own type color: art, name, types, ability, and all four moves as pills colored by
+ * the move's type. The whole card opens the editor.
+ */
+@OptIn(ExperimentalLayoutApi::class)
 @Composable
 private fun TeamMemberCard(
     member: TeamMember,
+    loadMove: suspend (String) -> MoveInfo?,
     onEdit: () -> Unit,
-    onRemove: () -> Unit,
 ) {
-    Card(
-        shape = RoundedCornerShape(14.dp),
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
-        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
+    val tint = typeTint(member.types.firstOrNull())
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clip(CardShape)
+            .background(tint.container)
+            .clickable(onClick = onEdit)
+            .padding(14.dp),
+        verticalArrangement = Arrangement.spacedBy(12.dp),
     ) {
         Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(12.dp),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(12.dp),
         ) {
-            AsyncImage(
-                model = member.artworkUrl,
-                contentDescription = member.pokemonName,
-                modifier = Modifier.size(54.dp),
-                contentScale = ContentScale.Fit,
-            )
-
+            Box(
+                Modifier.size(72.dp).clip(CircleShape).background(tint.art),
+                contentAlignment = Alignment.Center,
+            ) {
+                AsyncImage(
+                    model = member.artworkUrl,
+                    contentDescription = member.pokemonName,
+                    modifier = Modifier.size(68.dp),
+                    contentScale = ContentScale.Fit,
+                )
+            }
             Column(modifier = Modifier.weight(1f)) {
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(6.dp),
-                ) {
+                Text(
+                    text = member.nickname ?: NameFormatter.pretty(member.pokemonName),
+                    style = MaterialTheme.typography.titleMedium,
+                    color = tint.onContainer,
+                )
+                if (member.nickname != null) {
                     Text(
-                        text = member.nickname ?: NameFormatter.pretty(member.pokemonName),
-                        style = MaterialTheme.typography.titleMedium,
-                        fontWeight = FontWeight.Bold,
-                        color = MaterialTheme.colorScheme.onSurface,
+                        text = NameFormatter.pretty(member.pokemonName),
+                        style = MaterialTheme.typography.bodySmall,
+                        color = tint.onContainer.copy(alpha = 0.75f),
                     )
-                    if (member.nickname != null) {
-                        Text(
-                            text = "(${NameFormatter.pretty(member.pokemonName)})",
-                            style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        )
-                    }
                 }
-
-                Spacer(Modifier.height(4.dp))
-
+                Spacer(Modifier.height(6.dp))
                 Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
-                    member.types.forEach { type ->
-                        TypeBadge(type = type, small = true)
-                    }
-                }
-
-                if (member.ability != null) {
-                    Spacer(Modifier.height(4.dp))
-                    Text(
-                        text = "Ability: ${NameFormatter.pretty(member.ability)}",
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    )
-                }
-
-                if (member.moves.isNotEmpty()) {
-                    Spacer(Modifier.height(4.dp))
-                    Text(
-                        text = "Moves: ${member.moves.joinToString(", ") { NameFormatter.pretty(it) }}",
-                        style = MaterialTheme.typography.bodySmall,
-                        fontSize = 11.sp,
-                        color = MaterialTheme.colorScheme.primary,
-                    )
+                    member.types.forEach { TypeBadge(type = it, small = true, onTint = tint) }
                 }
             }
+            Icon(
+                imageVector = Icons.Default.Edit,
+                contentDescription = "Edit ${NameFormatter.pretty(member.pokemonName)}",
+                tint = tint.onContainer,
+                modifier = Modifier.size(20.dp),
+            )
+        }
 
-            Column {
-                IconButton(onClick = onEdit) {
-                    Icon(
-                        imageVector = Icons.Default.Edit,
-                        contentDescription = "Edit Member",
-                        tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                        modifier = Modifier.size(20.dp),
-                    )
-                }
-                IconButton(onClick = onRemove) {
-                    Icon(
-                        imageVector = Icons.Default.Delete,
-                        contentDescription = "Remove Member",
-                        tint = MaterialTheme.colorScheme.error,
-                        modifier = Modifier.size(20.dp),
-                    )
-                }
+        Text(
+            text = member.ability?.let { "Ability  ${NameFormatter.pretty(it)}" } ?: "No ability chosen",
+            style = MaterialTheme.typography.labelLarge,
+            color = tint.onContainer.copy(alpha = if (member.ability != null) 1f else 0.65f),
+        )
+
+        if (member.moves.isEmpty()) {
+            Text(
+                text = "No moves yet. Tap to choose up to four.",
+                style = MaterialTheme.typography.bodySmall,
+                color = tint.onContainer.copy(alpha = 0.7f),
+            )
+        } else {
+            FlowRow(
+                horizontalArrangement = Arrangement.spacedBy(6.dp),
+                verticalArrangement = Arrangement.spacedBy(6.dp),
+            ) {
+                member.moves.forEach { MoveChip(name = it, loadMove = loadMove) }
             }
         }
     }
 }
-
-@Composable
-private fun EditMemberDialog(
-    member: TeamMember,
-    onSave: (TeamMember) -> Unit,
-    onDismiss: () -> Unit,
-) {
-    var nickname by remember { mutableStateOf(member.nickname ?: "") }
-    var ability by remember { mutableStateOf(member.ability ?: "") }
-    var movesText by remember { mutableStateOf(member.moves.joinToString(", ")) }
-
-    AlertDialog(
-        onDismissRequest = onDismiss,
-        title = { Text("Edit ${NameFormatter.pretty(member.pokemonName)}") },
-        text = {
-            Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
-                OutlinedTextField(
-                    value = nickname,
-                    onValueChange = { nickname = it },
-                    label = { Text("Nickname (optional)") },
-                    singleLine = true,
-                )
-                OutlinedTextField(
-                    value = ability,
-                    onValueChange = { ability = it },
-                    label = { Text("Ability") },
-                    singleLine = true,
-                )
-                OutlinedTextField(
-                    value = movesText,
-                    onValueChange = { movesText = it },
-                    label = { Text("Moves (up to 4, comma separated)") },
-                    supportingText = { Text("e.g. Thunderbolt, Quick Attack, Iron Tail") },
-                )
-            }
-        },
-        confirmButton = {
-            Button(onClick = {
-                val movesList = movesText.split(",")
-                    .map { it.trim() }
-                    .filter { it.isNotEmpty() }
-                    .take(4)
-                onSave(
-                    member.copy(
-                        nickname = nickname.trim().ifEmpty { null },
-                        ability = ability.trim().ifEmpty { null },
-                        moves = movesList,
-                    )
-                )
-            }) {
-                Text("Save")
-            }
-        },
-        dismissButton = {
-            TextButton(onClick = onDismiss) {
-                Text("Cancel")
-            }
-        }
-    )
-}
-

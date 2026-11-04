@@ -12,6 +12,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.unit.dp
+import com.oaklog.app.presentation.theme.CardShape
+import com.oaklog.app.presentation.theme.ChipShape
 
 /*
  * Drop-in replacements for material3 Card / FilterChip. Screens import these explicitly, which wins
@@ -22,10 +24,10 @@ import androidx.compose.ui.unit.dp
 @Composable
 fun Card(
     modifier: Modifier = Modifier,
-    shape: Shape = RoundedCornerShape(24.dp),
+    shape: Shape = CardShape,
     colors: CardColors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
     @Suppress("UNUSED_PARAMETER") elevation: CardElevation = CardDefaults.cardElevation(),
-    border: BorderStroke? = BorderStroke(1.dp, MaterialTheme.colorScheme.outline),
+    border: BorderStroke? = null,
     content: @Composable ColumnScope.() -> Unit,
 ) {
     androidx.compose.material3.Card(
@@ -42,10 +44,10 @@ fun Card(
 fun Card(
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
-    shape: Shape = RoundedCornerShape(24.dp),
+    shape: Shape = CardShape,
     colors: CardColors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
     @Suppress("UNUSED_PARAMETER") elevation: CardElevation = CardDefaults.cardElevation(),
-    border: BorderStroke? = BorderStroke(1.dp, MaterialTheme.colorScheme.outline),
+    border: BorderStroke? = null,
     content: @Composable ColumnScope.() -> Unit,
 ) {
     androidx.compose.material3.Card(
@@ -75,9 +77,9 @@ fun FilterChip(
         modifier = modifier,
         enabled = enabled,
         leadingIcon = leadingIcon,
-        shape = RoundedCornerShape(12.dp),
+        shape = ChipShape,
         colors = FilterChipDefaults.filterChipColors(
-            containerColor = MaterialTheme.colorScheme.surface,
+            containerColor = MaterialTheme.colorScheme.surfaceVariant,
             labelColor = MaterialTheme.colorScheme.onSurfaceVariant,
             selectedContainerColor = MaterialTheme.colorScheme.primaryContainer,
             selectedLabelColor = MaterialTheme.colorScheme.onPrimaryContainer,
@@ -86,8 +88,8 @@ fun FilterChip(
         border = FilterChipDefaults.filterChipBorder(
             enabled = enabled,
             selected = selected,
-            borderColor = MaterialTheme.colorScheme.outline,
-            selectedBorderColor = MaterialTheme.colorScheme.primaryContainer,
+            borderColor = androidx.compose.ui.graphics.Color.Transparent,
+            selectedBorderColor = androidx.compose.ui.graphics.Color.Transparent,
         ),
     )
 }

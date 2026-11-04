@@ -69,7 +69,10 @@ class CollectionViewModel @Inject constructor(
             selectedGen = gen,
             isLoading = false,
         )
-    }.stateIn(
+    }
+        // Summarising and filtering the whole dex stays off the main thread.
+        .flowOn(kotlinx.coroutines.Dispatchers.Default)
+        .stateIn(
         scope = viewModelScope,
         started = SharingStarted.WhileSubscribed(5000),
         initialValue = CollectionUiState(isLoading = true),

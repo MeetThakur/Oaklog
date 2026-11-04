@@ -52,10 +52,17 @@ fun StatsTab(
 
                 Spacer(Modifier.height(12.dp))
 
+                // Bars take the Pokémon's own type color, darkened a touch so pale types still read.
+                val barColor = androidx.compose.ui.graphics.lerp(
+                    com.oaklog.app.presentation.theme.PokemonTypeColors.color(detail.types.firstOrNull() ?: "unknown"),
+                    androidx.compose.ui.graphics.Color.Black,
+                    0.2f,
+                )
                 detail.stats.forEach { stat ->
                     StatBar(
                         label = stat.label,
                         value = stat.value,
+                        barColor = barColor,
                     )
                 }
 

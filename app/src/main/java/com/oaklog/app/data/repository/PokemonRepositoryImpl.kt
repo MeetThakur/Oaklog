@@ -20,6 +20,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.Semaphore
@@ -55,6 +56,8 @@ class PokemonRepositoryImpl @Inject constructor(
                 )
             }
         }
+        // Mapping 1,000+ rows must not run on the collector's thread, which is usually the main one.
+        .flowOn(Dispatchers.Default)
 
     override suspend fun syncIndex(force: Boolean): Result<Unit> = withContext(Dispatchers.IO) {
         runCatching {

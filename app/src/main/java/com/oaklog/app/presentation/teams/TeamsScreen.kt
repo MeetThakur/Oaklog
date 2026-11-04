@@ -21,6 +21,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil3.compose.AsyncImage
 import com.oaklog.app.domain.model.Team
+import com.oaklog.app.presentation.theme.typeTint
 import com.oaklog.app.presentation.components.EmptyView
 import com.oaklog.app.presentation.components.OakTopBar
 import com.oaklog.app.presentation.components.TypeBadge
@@ -173,12 +174,14 @@ private fun TeamCard(
             ) {
                 for (i in 0 until 6) {
                     val member = team.members.getOrNull(i)
+                    // Each filled slot is painted in its member's type color, like its card elsewhere.
                     Surface(
                         modifier = Modifier
                             .weight(1f)
                             .aspectRatio(1f),
-                        shape = RoundedCornerShape(10.dp),
-                        color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),
+                        shape = RoundedCornerShape(16.dp),
+                        color = member?.let { typeTint(it.types.firstOrNull()).container }
+                            ?: MaterialTheme.colorScheme.surfaceVariant,
                     ) {
                         if (member != null) {
                             Box(contentAlignment = Alignment.Center) {

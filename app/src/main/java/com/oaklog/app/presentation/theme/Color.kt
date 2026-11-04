@@ -2,34 +2,29 @@ package com.oaklog.app.presentation.theme
 
 import androidx.compose.ui.graphics.Color
 
-// ---- OakLog Crimson & Journal Palette --------------------------------------------------------
-val OakRedPrimary = Color(0xFFC8102E)
-val OakRedDark = Color(0xFF7A0A1E)
-val OakRedLight = Color(0xFFFF5A64)
-val OakRedContainerLight = Color(0xFFFCE8EB)
-val OakRedContainerDark = Color(0xFF3A1016)
+// ---- Color block palette ---------------------------------------------------------------------
+// Clean neutrals so the type colors are the only chroma. Accent is plain ink (inverse in dark).
 
-// Light theme surfaces
-val OakJournalBackground = Color(0xFFF7F7F8)
-val OakSurfaceLight = Color(0xFFFFFFFF)
-val OakSurfaceVariantLight = Color(0xFFEEEEF1)
-val OakTextPrimaryLight = Color(0xFF111114)
-val OakTextSecondaryLight = Color(0xFF686873)
-val OakOutlineLight = Color(0xFFE3E3E8)
+// Light
+val LightBackground = Color(0xFFFFFFFF)
+val LightPanel = Color(0xFFF4F4F1)
+val LightPanelHigh = Color(0xFFEDEDE9)
+val LightPanelHighest = Color(0xFFE6E6E1)
+val LightInk = Color(0xFF1A1A18)
+val LightInkSecondary = Color(0xFF63635E)
+val LightRule = Color(0xFFE4E4DF)
 
-// Dark theme surfaces
-val OakDarkBackground = Color(0xFF0C0C0E)
-val OakSurfaceDark = Color(0xFF151518)
-val OakSurfaceVariantDark = Color(0xFF1F1F24)
-val OakTextPrimaryDark = Color(0xFFF2F2F4)
-val OakTextSecondaryDark = Color(0xFF9A9AA6)
-val OakOutlineDark = Color(0xFF2A2A31)
+// Dark
+val DarkBackground = Color(0xFF0F0F12)
+val DarkSurface = Color(0xFF17171C)
+val DarkPanelHigh = Color(0xFF1F1F25)
+val DarkPanelHighest = Color(0xFF2A2A31)
+val DarkInk = Color(0xFFF2F2F4)
+val DarkInkSecondary = Color(0xFF9A9AA3)
+val DarkRule = Color(0xFF2C2C34)
 
-// Accent Colors
-val OakGold = Color(0xFFD4A017)
-val OakSuccess = Color(0xFF2E7D32)
-val OakShinyGold = Color(0xFFFFB300)
-val OakCaughtGreen = Color(0xFF43A047)
-val OakSeenBlue = Color(0xFF1E88E5)
-val OakFavoriteRed = Color(0xFFE53935)
-
+// Status colors (collection, favorites, shiny)
+val OakShinyGold = Color(0xFFE0A100)
+val OakCaughtGreen = Color(0xFF2E9E5B)
+val OakSeenBlue = Color(0xFF3B82F6)
+val OakFavoriteRed = Color(0xFFE5484D)

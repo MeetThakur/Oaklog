@@ -22,7 +22,6 @@ import com.oaklog.app.domain.model.AbilityInfo
 import com.oaklog.app.domain.model.PokemonDetail
 import com.oaklog.app.presentation.components.DropdownOption
 import com.oaklog.app.presentation.components.OakDropdown
-import com.oaklog.app.presentation.theme.OakRedPrimary
 
 @Composable
 fun OverviewTab(
@@ -39,25 +38,6 @@ fun OverviewTab(
             .padding(16.dp),
         verticalArrangement = Arrangement.spacedBy(16.dp),
     ) {
-        // Genus / Classification banner
-        detail.genus?.let { genus ->
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .clip(RoundedCornerShape(12.dp))
-                    .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f))
-                    .padding(vertical = 10.dp, horizontal = 16.dp),
-                contentAlignment = Alignment.Center,
-            ) {
-                Text(
-                    text = "The $genus",
-                    style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.SemiBold,
-                    color = MaterialTheme.colorScheme.onSurface,
-                )
-            }
-        }
-
         // Pokédex Description with Game Version Switcher
         if (detail.dexEntries.isNotEmpty()) {
             Card(

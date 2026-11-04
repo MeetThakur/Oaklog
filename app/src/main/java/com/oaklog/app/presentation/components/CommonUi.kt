@@ -8,6 +8,8 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.CheckCircle
+import androidx.compose.material.icons.filled.Check
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.FavoriteBorder
 import androidx.compose.material.icons.filled.Visibility
@@ -26,7 +28,9 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.oaklog.app.domain.model.CollectionEntry
 import com.oaklog.app.domain.model.CollectionStatus
+import com.oaklog.app.presentation.theme.ChipShape
 import com.oaklog.app.presentation.theme.OakCaughtGreen
+import com.oaklog.app.presentation.theme.TypeTint
 import com.oaklog.app.presentation.theme.OakFavoriteRed
 import com.oaklog.app.presentation.theme.OakSeenBlue
 import com.oaklog.app.presentation.theme.OakShinyGold
@@ -158,45 +162,44 @@ fun EmptyView(
     }
 }
 
+/** Detail-header status control: a pill that cycles uncaught, seen, caught. Tinted on a type header. */
 @Composable
 fun CollectionStatusButton(
     entry: CollectionEntry?,
     onCycleStatus: () -> Unit,
     modifier: Modifier = Modifier,
+    tint: TypeTint? = null,
 ) {
     val status = entry?.status ?: CollectionStatus.NOT_CAUGHT
-    val (icon, color, text) = when (status) {
-        CollectionStatus.CAUGHT -> Triple(Icons.Filled.CheckCircle, OakCaughtGreen, "Caught")
-        CollectionStatus.SEEN -> Triple(Icons.Filled.Visibility, OakSeenBlue, "Seen")
-        CollectionStatus.NOT_CAUGHT -> Triple(Icons.Outlined.CheckCircleOutline, MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f), "Uncaught")
+    val caught = status == CollectionStatus.CAUGHT
+    val label = when (status) {
+        CollectionStatus.CAUGHT -> "Caught"
+        CollectionStatus.SEEN -> "Seen"
+        CollectionStatus.NOT_CAUGHT -> "Not caught"
     }
+    val icon = when (status) {
+        CollectionStatus.CAUGHT -> Icons.Filled.Check
+        CollectionStatus.SEEN -> Icons.Filled.Visibility
+        CollectionStatus.NOT_CAUGHT -> Icons.Filled.Add
+    }
+    val ink = tint?.onContainer ?: MaterialTheme.colorScheme.onSurface
+    val background = when {
+        caught -> ink
+        else -> tint?.chip ?: MaterialTheme.colorScheme.surfaceVariant
+    }
+    val foreground = if (caught) (tint?.container ?: MaterialTheme.colorScheme.background) else ink
 
-    Box(
+    Row(
         modifier = modifier
-            .clip(RoundedCornerShape(10.dp))
-            .background(if (status == CollectionStatus.NOT_CAUGHT) MaterialTheme.colorScheme.surface else color.copy(alpha = 0.12f))
-            .border(1.dp, if (status == CollectionStatus.NOT_CAUGHT) MaterialTheme.colorScheme.outline else color.copy(alpha = 0.5f), RoundedCornerShape(10.dp))
+            .clip(ChipShape)
+            .background(background)
             .clickable { onCycleStatus() }
-            .padding(horizontal = 10.dp, vertical = 6.dp),
-        contentAlignment = Alignment.Center,
+            .padding(horizontal = 14.dp, vertical = 8.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(6.dp),
     ) {
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(4.dp),
-        ) {
-            Icon(
-                imageVector = icon,
-                contentDescription = text,
-                tint = color,
-                modifier = Modifier.size(14.dp),
-            )
-            Text(
-                text = text,
-                fontSize = 12.sp,
-                fontWeight = FontWeight.Medium,
-                color = if (status == CollectionStatus.NOT_CAUGHT) MaterialTheme.colorScheme.onSurfaceVariant else color,
-            )
-        }
+        Icon(imageVector = icon, contentDescription = null, tint = foreground, modifier = Modifier.size(16.dp))
+        Text(text = label, style = MaterialTheme.typography.labelLarge, color = foreground)
     }
 }
 
@@ -205,7 +208,11 @@ fun FavoriteIconButton(
     isFavorite: Boolean,
     onToggle: () -> Unit,
     modifier: Modifier = Modifier,
+    tint: TypeTint? = null,
 ) {
+    // On a tinted card the idle heart takes the card's text color so it stays legible in both modes.
+    val idle = tint?.onContainer?.copy(alpha = 0.75f)
+        ?: MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f)
     IconButton(
         onClick = onToggle,
         modifier = modifier.size(32.dp),
@@ -213,8 +220,8 @@ fun FavoriteIconButton(
         Icon(
             imageVector = if (isFavorite) Icons.Filled.Favorite else Icons.Filled.FavoriteBorder,
             contentDescription = if (isFavorite) "Remove from favorites" else "Add to favorites",
-            tint = if (isFavorite) OakFavoriteRed else MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f),
-            modifier = Modifier.size(18.dp),
+            tint = if (isFavorite) OakFavoriteRed else idle,
+            modifier = Modifier.size(19.dp),
         )
     }
 }
@@ -255,9 +262,9 @@ fun OakFilterChip(
         onClick = onClick,
         modifier = modifier,
         label = { Text(label, fontSize = 13.sp, fontWeight = FontWeight.Medium) },
-        shape = RoundedCornerShape(12.dp),
+        shape = ChipShape,
         colors = FilterChipDefaults.filterChipColors(
-            containerColor = MaterialTheme.colorScheme.surface,
+            containerColor = MaterialTheme.colorScheme.surfaceVariant,
             labelColor = MaterialTheme.colorScheme.onSurfaceVariant,
             selectedContainerColor = MaterialTheme.colorScheme.primaryContainer,
             selectedLabelColor = MaterialTheme.colorScheme.onPrimaryContainer,
@@ -265,8 +272,8 @@ fun OakFilterChip(
         border = FilterChipDefaults.filterChipBorder(
             enabled = true,
             selected = selected,
-            borderColor = MaterialTheme.colorScheme.outline,
-            selectedBorderColor = MaterialTheme.colorScheme.primaryContainer,
+            borderColor = androidx.compose.ui.graphics.Color.Transparent,
+            selectedBorderColor = androidx.compose.ui.graphics.Color.Transparent,
         ),
     )
 }

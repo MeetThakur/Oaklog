@@ -34,6 +34,10 @@ import com.oaklog.app.presentation.theme.OakCaughtGreen
 import com.oaklog.app.presentation.theme.OakFavoriteRed
 import com.oaklog.app.presentation.theme.OakSeenBlue
 import com.oaklog.app.presentation.theme.OakShinyGold
+import androidx.compose.foundation.layout.fillMaxHeight
+import com.oaklog.app.presentation.theme.typeTint
+import com.oaklog.app.presentation.theme.ChipShape
+import com.oaklog.app.presentation.theme.CardShape
 
 @Composable
 fun CollectionScreen(
@@ -55,78 +59,57 @@ fun CollectionScreen(
                 .fillMaxSize()
                 .padding(innerPadding)
         ) {
-            // Hero Progress Card
-            Card(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 16.dp, vertical = 8.dp),
-                shape = RoundedCornerShape(18.dp),
-                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
-                elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
-            ) {
-                Column(modifier = Modifier.padding(16.dp)) {
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                        verticalAlignment = Alignment.CenterVertically,
-                    ) {
-                        Column {
-                            Text(
-                                text = "Pokédex Completion",
-                                style = MaterialTheme.typography.titleMedium,
-                                fontWeight = FontWeight.Bold,
-                                color = MaterialTheme.colorScheme.onSurface,
-                            )
-                            Text(
-                                text = "${state.summary.caught.done} of ${state.summary.caught.total} Species",
-                                style = MaterialTheme.typography.bodySmall,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                            )
-                        }
-
+            // Completion header: the headline number, a thick progress bar, three tinted tallies.
+            Column(modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp)) {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalAlignment = Alignment.Bottom,
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                ) {
+                    Column {
+                        Text(
+                            text = "Pokédex completion",
+                            style = MaterialTheme.typography.labelLarge,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        )
                         Text(
                             text = "${state.summary.caught.percent}%",
-                            style = MaterialTheme.typography.headlineMedium,
-                            fontWeight = FontWeight.Bold,
-                            color = MaterialTheme.colorScheme.primary,
+                            style = MaterialTheme.typography.displaySmall,
+                            color = MaterialTheme.colorScheme.onSurface,
                         )
                     }
-
-                    Spacer(Modifier.height(10.dp))
-
-                    LinearProgressIndicator(
-                        progress = { state.summary.caught.fraction },
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .height(8.dp)
-                            .clip(RoundedCornerShape(4.dp)),
-                        color = MaterialTheme.colorScheme.primary,
-                        trackColor = MaterialTheme.colorScheme.surfaceVariant,
+                    Text(
+                        text = "${state.summary.caught.done} of ${state.summary.caught.total} caught",
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        modifier = Modifier.padding(bottom = 8.dp),
                     )
+                }
 
-                    Spacer(Modifier.height(14.dp))
+                Spacer(Modifier.height(8.dp))
 
-                    // 3 Metric Badges: Seen, Shinies, Favorites
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.SpaceAround,
-                    ) {
-                        CollectionMetric(
-                            label = "Seen",
-                            count = state.summary.seen,
-                            color = OakSeenBlue,
-                        )
-                        CollectionMetric(
-                            label = "Shinies",
-                            count = state.summary.shiny,
-                            color = OakShinyGold,
-                        )
-                        CollectionMetric(
-                            label = "Favorites",
-                            count = state.summary.favorites,
-                            color = OakFavoriteRed,
-                        )
-                    }
+                Box(
+                    Modifier
+                        .fillMaxWidth()
+                        .height(14.dp)
+                        .clip(ChipShape)
+                        .background(MaterialTheme.colorScheme.surfaceVariant),
+                ) {
+                    Box(
+                        Modifier
+                            .fillMaxWidth(state.summary.caught.fraction.coerceIn(0f, 1f))
+                            .fillMaxHeight()
+                            .clip(ChipShape)
+                            .background(MaterialTheme.colorScheme.primary),
+                    )
+                }
+
+                Spacer(Modifier.height(14.dp))
+
+                Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+                    Tally("Seen", state.summary.seen, "water", Modifier.weight(1f))
+                    Tally("Shinies", state.summary.shiny, "electric", Modifier.weight(1f))
+                    Tally("Favorites", state.summary.favorites, "fairy", Modifier.weight(1f))
                 }
             }
 
@@ -216,26 +199,18 @@ fun CollectionScreen(
 }
 
 @Composable
-private fun CollectionMetric(
-    label: String,
-    count: Int,
-    color: Color,
-) {
-    Column(horizontalAlignment = Alignment.CenterHorizontally) {
-        Text(
-            text = count.toString(),
-            style = MaterialTheme.typography.titleLarge,
-            fontWeight = FontWeight.Bold,
-            color = color,
-        )
-        Text(
-            text = label,
-            style = MaterialTheme.typography.bodySmall,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-        )
+private fun Tally(label: String, count: Int, color: String, modifier: Modifier = Modifier) {
+    val tint = typeTint(color)
+    Column(
+        modifier = modifier
+            .clip(CardShape)
+            .background(tint.container)
+            .padding(horizontal = 14.dp, vertical = 12.dp),
+    ) {
+        Text(count.toString(), style = MaterialTheme.typography.headlineSmall, color = tint.onContainer)
+        Text(label, style = MaterialTheme.typography.labelMedium, color = tint.onContainer.copy(alpha = 0.75f))
     }
 }
-
 
 private data class EmptyContent(
     val title: String,

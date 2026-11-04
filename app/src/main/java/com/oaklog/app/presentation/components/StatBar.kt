@@ -22,6 +22,7 @@ fun StatBar(
     value: Int,
     modifier: Modifier = Modifier,
     maxStat: Int = 255,
+    barColor: Color = MaterialTheme.colorScheme.primary,
 ) {
     var animated by remember { mutableStateOf(false) }
     val progress by animateFloatAsState(
@@ -32,14 +33,6 @@ fun StatBar(
 
     LaunchedEffect(Unit) {
         animated = true
-    }
-
-    val barColor = when {
-        value < 50 -> Color(0xFFE53935)
-        value < 80 -> Color(0xFFFB8C00)
-        value < 110 -> Color(0xFF43A047)
-        value < 140 -> Color(0xFF00ACC1)
-        else -> Color(0xFF8E24AA)
     }
 
     Row(
@@ -59,23 +52,23 @@ fun StatBar(
         Text(
             text = value.toString(),
             modifier = Modifier.width(42.dp),
-            style = MaterialTheme.typography.bodyMedium,
-            fontWeight = FontWeight.Bold,
+            style = MaterialTheme.typography.labelMedium,
+            fontWeight = FontWeight.ExtraBold,
             color = MaterialTheme.colorScheme.onSurface,
         )
 
         Box(
             modifier = Modifier
                 .weight(1f)
-                .height(8.dp)
-                .clip(RoundedCornerShape(4.dp))
+                .height(10.dp)
+                .clip(RoundedCornerShape(5.dp))
                 .background(MaterialTheme.colorScheme.surfaceVariant)
         ) {
             Box(
                 modifier = Modifier
                     .fillMaxHeight()
                     .fillMaxWidth(fraction = progress)
-                    .clip(RoundedCornerShape(4.dp))
+                    .clip(RoundedCornerShape(5.dp))
                     .background(barColor)
             )
         }

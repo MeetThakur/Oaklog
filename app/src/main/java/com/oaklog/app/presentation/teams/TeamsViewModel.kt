@@ -3,11 +3,16 @@ package com.oaklog.app.presentation.teams
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.oaklog.app.domain.logic.TeamAnalysis
+import com.oaklog.app.domain.logic.Learnset
 import com.oaklog.app.domain.logic.SpeedTierEntry
 import com.oaklog.app.domain.logic.TeamAnalyzer
 import com.oaklog.app.domain.logic.TeamSuggestion
 import com.oaklog.app.domain.logic.TeamSuggestions
 import com.oaklog.app.domain.logic.TypeChart
+import com.oaklog.app.domain.model.AbilityInfo
+import com.oaklog.app.domain.model.AbilityRef
+import com.oaklog.app.domain.model.LearnEntry
+import com.oaklog.app.domain.model.MoveInfo
 import com.oaklog.app.domain.model.PokemonSummary
 import com.oaklog.app.domain.model.Team
 import com.oaklog.app.domain.model.TeamMember
@@ -18,6 +23,13 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import javax.inject.Inject
+
+/** What a team member may legally hold: its real abilities and every move it can learn. */
+data class MemberOptions(
+    val abilities: List<AbilityRef>,
+    val abilityInfo: Map<String, AbilityInfo>,
+    val learnset: List<LearnEntry>,
+)
 
 data class TeamsUiState(
     val teams: List<Team> = emptyList(),
@@ -123,6 +135,19 @@ class TeamsViewModel @Inject constructor(
         val tc = chart ?: _typeChart.value ?: return emptyList()
         return TeamSuggestions.generate(tc, analysis, team.members.size)
     }
+
+    /** Null when the Pokémon's details can't be loaded (offline, nothing cached). */
+    suspend fun memberOptions(member: TeamMember): MemberOptions? {
+        val detail = pokemonRepo.getPokemonDetail(member.pokemonId.toString()).getOrNull() ?: return null
+        // The numeric id sidesteps species/form name mismatches such as deoxys vs deoxys-normal.
+        val learnset = pokemonRepo.getLearnset(detail.id.toString()).getOrDefault(emptyList())
+        val info = detail.abilities.mapNotNull { ref ->
+            pokemonRepo.getAbility(ref.name).getOrNull()?.let { ref.name to it }
+        }.toMap()
+        return MemberOptions(detail.abilities, info, learnset)
+    }
+
+    suspend fun moveInfo(name: String): MoveInfo? = pokemonRepo.getMove(Learnset.slug(name)).getOrNull()
 
     fun computeAnalysis(team: Team, chart: TypeChart?): TeamAnalysis? {
         val tc = chart ?: _typeChart.value ?: return null

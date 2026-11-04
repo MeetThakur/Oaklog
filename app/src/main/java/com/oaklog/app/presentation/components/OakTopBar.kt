@@ -116,7 +116,7 @@ fun OakSearchBar(
                 focusedContainerColor = MaterialTheme.colorScheme.surface,
                 unfocusedContainerColor = MaterialTheme.colorScheme.surface,
                 focusedBorderColor = MaterialTheme.colorScheme.onSurface,
-                unfocusedBorderColor = MaterialTheme.colorScheme.outline,
+                unfocusedBorderColor = Color.Transparent,
                 cursorColor = MaterialTheme.colorScheme.onSurface,
             ),
         )

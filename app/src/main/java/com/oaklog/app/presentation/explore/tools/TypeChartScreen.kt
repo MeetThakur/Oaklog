@@ -21,7 +21,6 @@ import com.oaklog.app.presentation.components.LoadingView
 import com.oaklog.app.presentation.components.OakTopBar
 import com.oaklog.app.presentation.components.TypeBadge
 import com.oaklog.app.presentation.theme.OakCaughtGreen
-import com.oaklog.app.presentation.theme.OakRedPrimary
 
 @OptIn(ExperimentalLayoutApi::class, ExperimentalMaterial3Api::class)
 @Composable

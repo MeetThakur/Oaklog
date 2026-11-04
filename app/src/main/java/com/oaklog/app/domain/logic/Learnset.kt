@@ -40,4 +40,33 @@ object Learnset {
         "tutor" -> "Move tutor"
         else -> NameFormatter.pretty(method)
     }
+
+    /** A move the species can legally learn, with a short summary of how. */
+    data class LegalMove(val name: String, val sources: List<String>)
+
+    /**
+     * Every move the species can learn, optionally limited to one game, one row per move with its
+     * sources collapsed ("Lv 22 · TM · Egg"). Sorted by name. This is what a team slot may hold.
+     */
+    fun legalMoves(entries: List<LearnEntry>, versionGroup: String? = null): List<LegalMove> =
+        entries
+            .filter { versionGroup == null || it.versionGroup == versionGroup }
+            .groupBy { it.moveName }
+            .map { (name, rows) ->
+                val sources = buildList {
+                    rows.filter { it.method == "level-up" }.minOfOrNull { it.level }
+                        ?.let { add(if (it == 0) "Evolve" else "Lv $it") }
+                    if (rows.any { it.method == "machine" }) add("TM")
+                    if (rows.any { it.method == "egg" }) add("Egg")
+                    if (rows.any { it.method == "tutor" }) add("Tutor")
+                    rows.map { it.method }.distinct()
+                        .filter { it !in methodOrder }
+                        .forEach { add(if (it == "train") "Training" else NameFormatter.pretty(it)) }
+                }
+                LegalMove(name, sources)
+            }
+            .sortedBy { it.name }
+
+    /** Move and ability names are stored as API slugs; free text from older teams may not be. */
+    fun slug(name: String): String = name.trim().lowercase().replace(' ', '-')
 }

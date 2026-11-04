@@ -62,11 +62,15 @@ class PokedexViewModel @Inject constructor(
             totalCount = allPokemon.size,
             indexProgress = status.third,
         )
-    }.stateIn(
-        scope = viewModelScope,
-        started = SharingStarted.WhileSubscribed(5000),
-        initialValue = PokedexUiState(isLoading = true),
-    )
+    }
+        // Filtering and sorting the whole dex is real work, and indexing re-emits it dozens of times;
+        // doing it on the main thread froze the UI badly enough to trigger an ANR.
+        .flowOn(Dispatchers.Default)
+        .stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(5000),
+            initialValue = PokedexUiState(isLoading = true),
+        )
 
     init {
         sync()
