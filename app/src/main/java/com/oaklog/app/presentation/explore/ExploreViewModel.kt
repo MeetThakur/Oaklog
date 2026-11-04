@@ -7,9 +7,11 @@ import com.oaklog.app.domain.model.*
 import com.oaklog.app.domain.repository.PokemonRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -75,18 +77,15 @@ class ExploreViewModel @Inject constructor(
     }
 
     fun searchMove(query: String) {
-        val q = query.trim().lowercase().replace(' ', '-')
-        if (q.isEmpty()) {
+        if (query.isBlank()) {
+            // Drop the last search result, or the "initial list" loader would see a non-empty list and skip.
+            searchJobs["moves"]?.cancel()
+            _uiState.update { it.copy(movesList = emptyList()) }
             loadInitialMoves()
             return
         }
-        viewModelScope.launch(Dispatchers.IO) {
-            _uiState.update { it.copy(isLoading = true) }
-            pokemonRepo.getMove(q).onSuccess { move ->
-                _uiState.update { it.copy(movesList = listOf(move), isLoading = false) }
-            }.onFailure {
-                _uiState.update { it.copy(movesList = emptyList(), isLoading = false) }
-            }
+        launchSearch("moves", query, { pokemonRepo.getMoveList(limit = 2000) }, { pokemonRepo.getMove(it).getOrNull() }) { found ->
+            _uiState.update { it.copy(movesList = found, isLoading = false) }
         }
     }
 
@@ -104,18 +103,15 @@ class ExploreViewModel @Inject constructor(
     }
 
     fun searchAbility(query: String) {
-        val q = query.trim().lowercase().replace(' ', '-')
-        if (q.isEmpty()) {
+        if (query.isBlank()) {
+            // Drop the last search result, or the "initial list" loader would see a non-empty list and skip.
+            searchJobs["abilities"]?.cancel()
+            _uiState.update { it.copy(abilitiesList = emptyList()) }
             loadInitialAbilities()
             return
         }
-        viewModelScope.launch(Dispatchers.IO) {
-            _uiState.update { it.copy(isLoading = true) }
-            pokemonRepo.getAbility(q).onSuccess { ability ->
-                _uiState.update { it.copy(abilitiesList = listOf(ability), isLoading = false) }
-            }.onFailure {
-                _uiState.update { it.copy(abilitiesList = emptyList(), isLoading = false) }
-            }
+        launchSearch("abilities", query, { pokemonRepo.getAbilityList(limit = 1000) }, { pokemonRepo.getAbility(it).getOrNull() }) { found ->
+            _uiState.update { it.copy(abilitiesList = found, isLoading = false) }
         }
     }
 
@@ -143,18 +139,53 @@ class ExploreViewModel @Inject constructor(
     }
 
     fun searchItem(query: String) {
-        val q = query.trim().lowercase().replace(' ', '-')
-        if (q.isEmpty()) {
+        if (query.isBlank()) {
+            // Drop the last search result, or the "initial list" loader would see a non-empty list and skip.
+            searchJobs["items"]?.cancel()
+            _uiState.update { it.copy(itemsList = emptyList()) }
             loadInitialItems()
             return
         }
-        viewModelScope.launch(Dispatchers.IO) {
+        launchSearch("items", query, { pokemonRepo.getItemList(limit = 3000) }, { pokemonRepo.getItem(it).getOrNull() }) { found ->
+            _uiState.update { it.copy(itemsList = found, isLoading = false) }
+        }
+    }
+
+    private val searchJobs = mutableMapOf<String, Job>()
+    private val nameLists = mutableMapOf<String, List<NamedEntry>>()
+
+    /**
+     * Matches [query] against the cached name list (not an exact-slug lookup), then loads details for the
+     * best few. Typing again cancels the previous search so a slow reply can't overwrite a newer one.
+     */
+    private fun <T : Any> launchSearch(
+        kind: String,
+        query: String,
+        loadNames: suspend () -> Result<List<NamedEntry>>,
+        load: suspend (String) -> T?,
+        publish: (List<T>) -> Unit,
+    ) {
+        searchJobs[kind]?.cancel()
+        searchJobs[kind] = viewModelScope.launch(Dispatchers.IO) {
+            delay(250)
             _uiState.update { it.copy(isLoading = true) }
-            pokemonRepo.getItem(q).onSuccess { item ->
-                _uiState.update { it.copy(itemsList = listOf(item), isLoading = false) }
-            }.onFailure {
-                _uiState.update { it.copy(itemsList = emptyList(), isLoading = false) }
+            val names = nameLists[kind] ?: loadNames().getOrNull()?.also { nameLists[kind] = it }
+            if (names == null) {
+                publish(emptyList())
+                return@launch
             }
+            val needle = query.trim().lowercase().replace(' ', '-')
+            fun rank(name: String) = when {
+                name == needle -> 0
+                name.startsWith(needle) -> 1
+                name.split('-').any { it.startsWith(needle) } -> 2
+                name.contains(needle) -> 3
+                else -> -1
+            }
+            val top = names.mapNotNull { e -> rank(e.name).takeIf { it >= 0 }?.let { it to e } }
+                .sortedWith(compareBy({ it.first }, { it.second.name }))
+                .take(20).map { it.second }
+            publish(fetchDetails(top, load))
         }
     }
 

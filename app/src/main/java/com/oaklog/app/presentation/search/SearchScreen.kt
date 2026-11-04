@@ -31,6 +31,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -61,6 +62,9 @@ fun SearchScreen(
     val state by viewModel.uiState.collectAsState()
     val focus = remember { FocusRequester() }
     var sheet by remember { mutableStateOf<ReferenceTarget?>(null) }
+    // The field owns its text; reading it back from the flow-derived state made the cursor jump.
+    var text by rememberSaveable { mutableStateOf(state.query) }
+    val update: (String) -> Unit = { text = it; viewModel.onQueryChange(it) }
 
     LaunchedEffect(Unit) { focus.requestFocus() }
 
@@ -74,14 +78,14 @@ fun SearchScreen(
                     Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
                 }
                 OutlinedTextField(
-                    value = state.query,
-                    onValueChange = viewModel::onQueryChange,
+                    value = text,
+                    onValueChange = update,
                     modifier = Modifier.weight(1f).focusRequester(focus),
                     placeholder = { Text("Pokémon, moves, abilities, items") },
                     leadingIcon = { Icon(Icons.Outlined.Search, contentDescription = null) },
                     trailingIcon = {
-                        if (state.query.isNotEmpty()) {
-                            IconButton(onClick = { viewModel.onQueryChange("") }) {
+                        if (text.isNotEmpty()) {
+                            IconButton(onClick = { update("") }) {
                                 Icon(Icons.Default.Close, contentDescription = "Clear")
                             }
                         }

@@ -15,6 +15,10 @@ import androidx.compose.material.icons.outlined.GridView
 import androidx.compose.material.icons.outlined.Settings
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -79,6 +83,11 @@ fun OakSearchBar(
     layout: DexLayout = DexLayout.GRID,
     onToggleLayout: (() -> Unit)? = null,
 ) {
+    // The caller's query comes back through a state flow computed off the main thread, so feeding it
+    // straight into the field made the cursor jump back and fast keystrokes get overwritten. The field
+    // owns its text and only reports changes; the clear button goes through the same path.
+    var text by rememberSaveable { mutableStateOf(query) }
+    val update: (String) -> Unit = { text = it; onQueryChange(it) }
     Row(
         modifier = modifier
             .fillMaxWidth()
@@ -87,8 +96,8 @@ fun OakSearchBar(
         horizontalArrangement = Arrangement.spacedBy(8.dp),
     ) {
         OutlinedTextField(
-            value = query,
-            onValueChange = onQueryChange,
+            value = text,
+            onValueChange = update,
             modifier = Modifier.weight(1f).heightIn(min = 48.dp),
             placeholder = {
                 Text(
@@ -106,8 +115,8 @@ fun OakSearchBar(
                 )
             },
             trailingIcon = {
-                if (query.isNotEmpty()) {
-                    IconButton(onClick = { onQueryChange("") }) {
+                if (text.isNotEmpty()) {
+                    IconButton(onClick = { update("") }) {
                         Icon(
                             imageVector = Icons.Default.Close,
                             contentDescription = "Clear",

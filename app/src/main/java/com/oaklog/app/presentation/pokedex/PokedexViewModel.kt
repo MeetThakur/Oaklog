@@ -44,28 +44,33 @@ class PokedexViewModel @Inject constructor(
     private val _isLoading = MutableStateFlow(false)
     private val _error = MutableStateFlow<String?>(null)
 
-    val uiState: StateFlow<PokedexUiState> = combine(
+    // Filtering and sorting the whole dex is the expensive part, so it runs only when the species,
+    // the collection or the filters change. Indexing progress ticks dozens of times and must not redo it.
+    private val filteredList = combine(
         pokemonRepo.observeIndex(),
         collectionRepo.observeCollection(),
         _filters,
+    ) { allPokemon, collection, filters ->
+        Triple(allPokemon.size, collection, PokedexQuery.apply(allPokemon, collection, filters))
+    }.flowOn(Dispatchers.Default)
+
+    val uiState: StateFlow<PokedexUiState> = combine(
+        filteredList,
+        _filters,
         settingsStore.settings,
         combine(_isLoading, _error, pokemonRepo.hydrationProgress) { l, e, p -> Triple(l, e, p) },
-    ) { allPokemon, collection, filters, settings, status ->
-        val filtered = PokedexQuery.apply(allPokemon, collection, filters)
+    ) { filtered, filters, settings, status ->
         PokedexUiState(
-            pokemonList = filtered,
-            collectionMap = collection,
+            pokemonList = filtered.third,
+            collectionMap = filtered.second,
             filters = filters,
             layout = settings.layout,
             isLoading = status.first,
             error = status.second,
-            totalCount = allPokemon.size,
+            totalCount = filtered.first,
             indexProgress = status.third,
         )
     }
-        // Filtering and sorting the whole dex is real work, and indexing re-emits it dozens of times;
-        // doing it on the main thread froze the UI badly enough to trigger an ANR.
-        .flowOn(Dispatchers.Default)
         .stateIn(
             scope = viewModelScope,
             started = SharingStarted.WhileSubscribed(5000),
