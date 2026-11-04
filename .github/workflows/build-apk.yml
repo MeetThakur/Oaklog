@@ -28,9 +28,12 @@ jobs:
           distribution: temurin
           java-version: 17
 
-      # Installs the SDK command-line tools and accepts licenses so Gradle can fetch compileSdk 36.
-      - name: Set up Android SDK
-        uses: android-actions/setup-android@v3
+      # The runner image already has the Android SDK. Accepting its licenses lets Gradle download the
+      # compileSdk 36 platform on demand. (android-actions/setup-android failed on a removed "tools" package.)
+      - name: Accept Android SDK licenses
+        run: |
+          SDKMANAGER="$(ls "$ANDROID_HOME"/cmdline-tools/*/bin/sdkmanager | head -n 1)"
+          yes | "$SDKMANAGER" --licenses > /dev/null || true
 
       # Caches Gradle dependencies and the wrapper distribution between runs.
       - name: Set up Gradle
