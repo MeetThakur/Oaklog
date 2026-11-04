@@ -47,6 +47,8 @@ import coil3.compose.AsyncImage
 import com.oaklog.app.domain.logic.NameFormatter
 import com.oaklog.app.domain.logic.Places
 import com.oaklog.app.domain.model.AreaSpawn
+import com.oaklog.app.domain.model.LocationSummary
+import com.oaklog.app.domain.model.SummaryMon
 import com.oaklog.app.domain.model.SpawnEntry
 import com.oaklog.app.presentation.components.DropdownOption
 import com.oaklog.app.presentation.components.EmptyView
@@ -66,12 +68,21 @@ fun RegionPlacesScreen(
     modifier: Modifier = Modifier,
 ) {
     val state by viewModel.state.collectAsState()
+    val summaries by viewModel.summaries.collectAsState()
     var query by remember { mutableStateOf("") }
+    var game by remember { mutableStateOf("") }
     val region = viewModel.region
-    val shown = remember(state.locations, query) {
+    // Games offered are those seen so far, so the list grows as rows load their summaries.
+    val games = remember(summaries) {
+        summaries.values.flatMap { it.getOrNull()?.perGame?.keys.orEmpty() }.distinct().sorted()
+    }
+    val shown = remember(state.locations, query, game, summaries) {
         val q = query.trim().lowercase().replace('-', ' ')
-        if (q.isEmpty()) state.locations
-        else state.locations.filter { it.name.replace('-', ' ').contains(q) }
+        state.locations.filter { loc ->
+            (q.isEmpty() || loc.name.replace('-', ' ').contains(q)) &&
+                // With a game picked, hide places we know have nothing in it; unloaded ones stay.
+                (game.isEmpty() || summaries[loc.name]?.getOrNull()?.forGame(game) != null || summaries[loc.name] == null)
+        }
     }
 
     Scaffold(
@@ -106,6 +117,16 @@ fun RegionPlacesScreen(
                             focusedBorderColor = MaterialTheme.colorScheme.onSurface,
                         ),
                     )
+                    if (games.isNotEmpty()) {
+                        OakDropdown(
+                            label = "Game",
+                            options = listOf(DropdownOption("", "All games")) +
+                                games.map { DropdownOption(it, NameFormatter.pretty(it)) },
+                            selected = game,
+                            onSelect = { game = it },
+                            modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 4.dp),
+                        )
+                    }
                     if (shown.isEmpty()) {
                         EmptyView(
                             title = "No place matches",
@@ -115,24 +136,14 @@ fun RegionPlacesScreen(
                     } else {
                         LazyColumn(contentPadding = PaddingValues(horizontal = 16.dp, vertical = 4.dp)) {
                             items(shown, key = { it.id }) { place ->
-                                Row(
-                                    modifier = Modifier
-                                        .fillMaxWidth()
-                                        .clickable { onLocationClick(place.name) }
-                                        .padding(vertical = 16.dp),
-                                    verticalAlignment = Alignment.CenterVertically,
-                                ) {
-                                    Text(
-                                        Places.locationLabel(place.name, region),
-                                        style = MaterialTheme.typography.titleSmall,
-                                        modifier = Modifier.weight(1f),
-                                    )
-                                    Icon(
-                                        Icons.AutoMirrored.Filled.KeyboardArrowRight,
-                                        contentDescription = null,
-                                        tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                                    )
-                                }
+                                LocationRow(
+                                    label = Places.locationLabel(place.name, region),
+                                    summary = summaries[place.name],
+                                    game = game.ifEmpty { null },
+                                    onShow = { viewModel.requestSummary(place.name) },
+                                    onRetry = { viewModel.retrySummary(place.name) },
+                                    onClick = { onLocationClick(place.name) },
+                                )
                                 androidx.compose.material3.HorizontalDivider(color = MaterialTheme.colorScheme.outline)
                             }
                         }
@@ -330,6 +341,97 @@ private fun SpawnRow(spawn: AreaSpawn, game: String?, onPokemonClick: (Int) -> U
             if (chance > 0) {
                 Text("$chance%", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
             }
+        }
+    }
+}
+
+/**
+ * One location in a region: its name, then what lives there. The summary loads when the row first
+ * appears, so a long region doesn't fetch every location up front.
+ */
+@Composable
+private fun LocationRow(
+    label: String,
+    summary: Result<LocationSummary>?,
+    game: String?,
+    onShow: () -> Unit,
+    onRetry: () -> Unit,
+    onClick: () -> Unit,
+) {
+    androidx.compose.runtime.LaunchedEffect(label) { onShow() }
+    Column(Modifier.fillMaxWidth()) {
+        Row(
+            modifier = Modifier.fillMaxWidth().clickable(onClick = onClick).padding(vertical = 14.dp),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                Text(label, style = MaterialTheme.typography.titleSmall)
+                val info = summary?.getOrNull()?.forGame(game)
+                when {
+                    summary == null -> Text("Loading…", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                    summary.isFailure -> Text(
+                        "Couldn't load. Tap to retry.",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.error,
+                        modifier = Modifier.clickable(onClick = onRetry),
+                    )
+                    summary.getOrNull() != null && info == null -> Text(
+                        "Not found here in ${NameFormatter.pretty(game ?: "")}",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                    info != null && info.pokemon.isEmpty() -> Text(
+                        "No wild Pokémon recorded",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                    info != null -> {
+                        Text(
+                            "${info.pokemon.size} Pokémon" +
+                                if (info.maxLevel > 0) " · ${Places.levelRange(info.minLevel, info.maxLevel)}" else "",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        )
+                        MonStrip(info.pokemon)
+                    }
+                }
+            }
+            Icon(
+                Icons.AutoMirrored.Filled.KeyboardArrowRight,
+                contentDescription = null,
+                tint = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+        }
+    }
+}
+
+/** Up to six small sprites, then a "+N" for the rest. Forms without a species id are counted, not drawn. */
+@Composable
+private fun MonStrip(pokemon: List<SummaryMon>) {
+    val shown = pokemon.filter { it.id != null }.take(6)
+    if (shown.isEmpty()) return
+    Row(horizontalArrangement = Arrangement.spacedBy((-6).dp), verticalAlignment = Alignment.CenterVertically) {
+        shown.forEach { mon ->
+            Box(
+                Modifier.size(32.dp).clip(CircleShape).background(MaterialTheme.colorScheme.surfaceVariant),
+                contentAlignment = Alignment.Center,
+            ) {
+                AsyncImage(
+                    model = "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/${mon.id}.png",
+                    contentDescription = NameFormatter.pretty(mon.name),
+                    modifier = Modifier.size(30.dp),
+                    contentScale = ContentScale.Fit,
+                )
+            }
+        }
+        val rest = pokemon.size - shown.size
+        if (rest > 0) {
+            Text(
+                "+$rest",
+                style = MaterialTheme.typography.labelSmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier.padding(start = 12.dp),
+            )
         }
     }
 }

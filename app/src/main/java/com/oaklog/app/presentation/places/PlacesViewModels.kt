@@ -4,6 +4,7 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.oaklog.app.domain.model.AreaSpawn
+import com.oaklog.app.domain.model.LocationSummary
 import com.oaklog.app.domain.model.NamedEntry
 import com.oaklog.app.domain.repository.PokemonRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -31,7 +32,27 @@ class RegionPlacesViewModel @Inject constructor(
     private val _state = MutableStateFlow(RegionPlacesState())
     val state: StateFlow<RegionPlacesState> = _state.asStateFlow()
 
+    /** Per-location summaries, filled in as rows scroll into view. */
+    private val _summaries = MutableStateFlow<Map<String, Result<LocationSummary>>>(emptyMap())
+    val summaries: StateFlow<Map<String, Result<LocationSummary>>> = _summaries.asStateFlow()
+    private val requested = java.util.Collections.synchronizedSet(HashSet<String>())
+
     init { load() }
+
+    /** Safe to call on every composition: each location is fetched once, failures can retry via [retrySummary]. */
+    fun requestSummary(location: String) {
+        if (!requested.add(location)) return
+        viewModelScope.launch(Dispatchers.IO) {
+            val result = repo.getLocationSummary(location)
+            _summaries.update { it + (location to result) }
+        }
+    }
+
+    fun retrySummary(location: String) {
+        requested.remove(location)
+        _summaries.update { it - location }
+        requestSummary(location)
+    }
 
     fun load() {
         viewModelScope.launch(Dispatchers.IO) {

@@ -3,7 +3,11 @@ package com.oaklog.app.presentation.teams
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.oaklog.app.domain.logic.TeamAnalysis
+import com.oaklog.app.domain.logic.Attack
+import com.oaklog.app.domain.logic.CoverageResult
 import com.oaklog.app.domain.logic.Learnset
+import com.oaklog.app.domain.logic.NameFormatter
+import com.oaklog.app.domain.logic.TeamCoverage
 import com.oaklog.app.domain.logic.SpeedTierEntry
 import com.oaklog.app.domain.logic.TeamAnalyzer
 import com.oaklog.app.domain.logic.TeamSuggestion
@@ -154,6 +158,28 @@ class TeamsViewModel @Inject constructor(
     }
 
     suspend fun moveInfo(name: String): MoveInfo? = pokemonRepo.getMove(Learnset.slug(name)).getOrNull()
+
+    /**
+     * Coverage from members' own types plus the damaging moves they have chosen. Move details come
+     * from the repository cache, so this is cheap after a member's moves have been seen once.
+     */
+    suspend fun coverage(team: Team): CoverageResult? {
+        val chart = _typeChart.value ?: return null
+        val stab = team.members.flatMap { m ->
+            val name = m.nickname ?: NameFormatter.pretty(m.pokemonName)
+            m.types.map { Attack(name, null, it) }
+        }
+        val moves = team.members.flatMap { m ->
+            val name = m.nickname ?: NameFormatter.pretty(m.pokemonName)
+            m.moves.mapNotNull { move ->
+                val info = moveInfo(move) ?: return@mapNotNull null
+                val type = info.type ?: return@mapNotNull null
+                // Status moves (and anything with no damage class) cover nothing.
+                if (info.damageClass == null || info.damageClass == "status") null else Attack(name, move, type)
+            }
+        }
+        return TeamCoverage.compute(chart, stab, moves)
+    }
 
     fun computeAnalysis(team: Team, chart: TypeChart?): TeamAnalysis? {
         val tc = chart ?: _typeChart.value ?: return null

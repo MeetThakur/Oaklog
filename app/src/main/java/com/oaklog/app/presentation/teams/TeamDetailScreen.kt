@@ -29,6 +29,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil3.compose.AsyncImage
+import com.oaklog.app.domain.logic.CoverageResult
 import com.oaklog.app.domain.logic.NameFormatter
 import com.oaklog.app.domain.logic.SpeedTierEntry
 import com.oaklog.app.domain.model.MoveInfo
@@ -101,9 +102,15 @@ fun TeamDetailScreen(
                 .padding(innerPadding),
         ) {
             // Squad board: six tinted slots plus type coverage
+            // Recomputed whenever members, their moves, or the type chart change.
+            val coverageKey = team.members.map { Triple(it.id, it.moves, it.nickname) }
+            val coverage by produceState<CoverageResult?>(null, coverageKey, state.typeChart) {
+                value = viewModel.coverage(team)
+            }
             SquadBoard(
                 team = team,
                 analysis = viewModel.computeAnalysis(team, state.typeChart),
+                coverage = coverage,
                 onAddMember = { showPickerSheet = true },
                 onSelectMember = { member ->
                     selectedTab = 0

@@ -8,6 +8,7 @@ import com.oaklog.app.data.prefs.SettingsDataStore
 import com.oaklog.app.data.remote.PokeApiService
 import com.oaklog.app.data.remote.dto.*
 import com.oaklog.app.domain.logic.NameFormatter
+import com.oaklog.app.domain.logic.Places
 import com.oaklog.app.domain.logic.TypeChart
 import com.oaklog.app.domain.model.*
 import com.oaklog.app.domain.repository.PokemonRepository
@@ -166,6 +167,7 @@ class PokemonRepositoryImpl @Inject constructor(
     private companion object {
         const val HYDRATION_CONCURRENCY = 6
         const val HYDRATION_BATCH = 24
+        const val PLACES_CONCURRENCY = 4
 
         /** PokéAPI numbers alternate forms from 10001, so anything below is a species. */
         const val MAX_SPECIES_ID = 9999
@@ -539,6 +541,21 @@ class PokemonRepositoryImpl @Inject constructor(
         runCatching {
             val dto = cache.get("location_area_$area", LocationAreaDto.serializer()) { api.locationArea(area) }
             AreaMapper.spawns(dto.pokemonEncounters)
+        }
+    }
+
+    private val placesGate = Semaphore(PLACES_CONCURRENCY)
+
+    override suspend fun getLocationSummary(location: String): Result<LocationSummary> = withContext(Dispatchers.IO) {
+        runCatching {
+            val areas = getLocationAreas(location).getOrThrow()
+            val spawns = coroutineScope {
+                areas.map { area ->
+                    // Rows load their summaries as they scroll, so cap how many requests run at once.
+                    async { placesGate.withPermit { getAreaSpawns(area.name).getOrThrow() } }
+                }.awaitAll()
+            }
+            Places.summarize(spawns)
         }
     }
 

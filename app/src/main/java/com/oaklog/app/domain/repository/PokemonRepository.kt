@@ -39,6 +39,9 @@ interface PokemonRepository {
     suspend fun getRegionLocations(region: String): Result<List<NamedEntry>>
     suspend fun getLocationAreas(location: String): Result<List<NamedEntry>>
     suspend fun getAreaSpawns(area: String): Result<List<AreaSpawn>>
+
+    /** Every area of [location] folded into one summary. Cached, but costs one request per area. */
+    suspend fun getLocationSummary(location: String): Result<LocationSummary>
     suspend fun getGenerations(): Result<List<GenerationInfo>>
     suspend fun getGameVersions(): Result<List<GameVersion>>
     suspend fun getTypeChart(): Result<TypeChart>

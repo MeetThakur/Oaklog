@@ -1,5 +1,6 @@
 package com.oaklog.app.data.local
 
+import android.content.Context
 import com.oaklog.app.data.local.dao.CachedResourceDao
 import com.oaklog.app.data.local.entity.CachedResourceEntity
 import kotlinx.coroutines.CompletableDeferred
@@ -10,6 +11,7 @@ import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.serialization.KSerializer
 import kotlinx.serialization.json.Json
+import dagger.hilt.android.qualifiers.ApplicationContext
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -25,10 +27,30 @@ import javax.inject.Singleton
 class ResourceCache @Inject constructor(
     private val dao: CachedResourceDao,
     private val json: Json,
+    @ApplicationContext private val context: Context,
 ) {
+    private var schemaChecked = false
     private val inFlight = HashMap<String, CompletableDeferred<String>>()
     private val lock = Mutex()
     private val scope = CoroutineScope(Dispatchers.IO)
+
+    /**
+     * Payloads are stored re-encoded through our DTOs, so a field added to a DTO later is missing
+     * from every entry saved before. When [SCHEMA_VERSION] moves, drop the old entries once and let
+     * them refetch with the new fields. Only cached API responses go: not the index, collection or teams.
+     */
+    private suspend fun ensureSchema() {
+        if (schemaChecked) return
+        lock.withLock {
+            if (schemaChecked) return
+            val prefs = context.getSharedPreferences("oaklog_cache_meta", Context.MODE_PRIVATE)
+            if (prefs.getInt("schema", 0) < SCHEMA_VERSION) {
+                dao.clear()
+                prefs.edit().putInt("schema", SCHEMA_VERSION).apply()
+            }
+            schemaChecked = true
+        }
+    }
 
     suspend fun <T> get(
         key: String,
@@ -36,6 +58,7 @@ class ResourceCache @Inject constructor(
         maxAgeMs: Long = DETAIL_TTL_MS,
         fetch: suspend () -> T,
     ): T {
+        ensureSchema()
         val cached = dao.get(key)
         val now = System.currentTimeMillis()
         if (cached != null && now - cached.fetchedAt < maxAgeMs) {
@@ -52,10 +75,15 @@ class ResourceCache @Inject constructor(
     }
 
     /** Returns the cached value regardless of age, or null. Never touches the network. */
-    suspend fun <T> peek(key: String, serializer: KSerializer<T>): T? =
-        dao.get(key)?.let { decode(serializer, it.json) }
+    suspend fun <T> peek(key: String, serializer: KSerializer<T>): T? {
+        ensureSchema()
+        return dao.get(key)?.let { decode(serializer, it.json) }
+    }
 
-    suspend fun isCached(key: String): Boolean = dao.get(key) != null
+    suspend fun isCached(key: String): Boolean {
+        ensureSchema()
+        return dao.get(key) != null
+    }
 
     private fun <T> decode(serializer: KSerializer<T>, text: String): T? =
         runCatching { json.decodeFromString(serializer, text) }.getOrNull()
@@ -82,6 +110,11 @@ class ResourceCache @Inject constructor(
     }
 
     companion object {
+        /**
+         * Bump whenever a DTO gains a field the app reads. Version 2: location lists on regions,
+         * cries and female sprites on Pokémon.
+         */
+        const val SCHEMA_VERSION = 2
         const val DAY_MS = 24L * 60 * 60 * 1000
         const val DETAIL_TTL_MS = 30 * DAY_MS
         const val LIST_TTL_MS = 7 * DAY_MS

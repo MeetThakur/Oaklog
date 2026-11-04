@@ -32,6 +32,7 @@ sealed class Screen(val route: String) {
     data object ItemsDatabase : Screen("explore/items")
     data object Regions : Screen("explore/regions")
     data object EvolutionFinder : Screen("explore/evolutions")
+    data object Natures : Screen("explore/natures")
 
     data object RegionPlaces : Screen("explore/region/{name}") {
         fun createRoute(name: String) = "explore/region/$name"

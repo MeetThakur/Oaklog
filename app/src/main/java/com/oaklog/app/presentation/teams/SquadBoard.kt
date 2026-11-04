@@ -1,6 +1,7 @@
 package com.oaklog.app.presentation.teams
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
@@ -31,6 +32,7 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import coil3.compose.AsyncImage
+import com.oaklog.app.domain.logic.CoverageResult
 import com.oaklog.app.domain.logic.NameFormatter
 import com.oaklog.app.domain.logic.TeamAnalysis
 import com.oaklog.app.domain.model.Team
@@ -47,6 +49,7 @@ import com.oaklog.app.presentation.theme.typeTint
 fun SquadBoard(
     team: Team,
     analysis: TeamAnalysis?,
+    coverage: CoverageResult?,
     onAddMember: () -> Unit,
     onSelectMember: (TeamMember) -> Unit,
     modifier: Modifier = Modifier,
@@ -67,7 +70,7 @@ fun SquadBoard(
                 }
             }
         }
-        if (analysis != null && team.members.isNotEmpty()) CoverageRow(analysis)
+        if (analysis != null && team.members.isNotEmpty()) CoverageRow(analysis, coverage)
     }
 }
 
@@ -137,13 +140,22 @@ private fun SquadSlot(member: TeamMember?, onClick: () -> Unit, modifier: Modifi
     }
 }
 
-/** All 18 types in one scrollable row; the ones the team hits super-effectively keep their color. */
+/**
+ * All 18 types in one scrollable row. A type is colored when the team hits it super-effectively;
+ * an outlined chip means it is only covered thanks to a chosen move, not a member's own types.
+ */
 @Composable
-private fun CoverageRow(analysis: TeamAnalysis) {
+private fun CoverageRow(analysis: TeamAnalysis, coverage: CoverageResult?) {
     val all = analysis.defensive.map { it.attackType }
+    // Until move data arrives (or if it can't load) fall back to own-type coverage.
+    val covered = coverage?.covered ?: analysis.offensiveCoverage
+    val viaMoves = coverage?.onlyViaMoves.orEmpty()
     Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
         Text(
-            text = "Coverage  ${analysis.offensiveCoverage.size}/${all.size}",
+            text = buildString {
+                append("Coverage  ${covered.size}/${all.size}")
+                if (viaMoves.isNotEmpty()) append("  ·  ${viaMoves.size} from moves (outlined)")
+            },
             style = MaterialTheme.typography.labelMedium,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
         )
@@ -152,15 +164,17 @@ private fun CoverageRow(analysis: TeamAnalysis) {
             horizontalArrangement = Arrangement.spacedBy(6.dp),
         ) {
             all.forEach { type ->
-                val covered = type in analysis.offensiveCoverage
+                val isCovered = type in covered
                 val tint = typeTint(type)
+                val outlined = type in viaMoves
                 Text(
                     text = NameFormatter.pretty(type),
                     style = MaterialTheme.typography.labelSmall,
-                    color = if (covered) tint.onContainer else MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f),
+                    color = if (isCovered) tint.onContainer else MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f),
                     modifier = Modifier
                         .clip(ChipShape)
-                        .background(if (covered) tint.container else MaterialTheme.colorScheme.surfaceVariant)
+                        .background(if (isCovered) tint.container else MaterialTheme.colorScheme.surfaceVariant)
+                        .let { if (outlined) it.border(1.5.dp, tint.onContainer.copy(alpha = 0.55f), ChipShape) else it }
                         .padding(horizontal = 10.dp, vertical = 4.dp),
                 )
             }

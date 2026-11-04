@@ -5,6 +5,12 @@ val STAT_KEYS = listOf("hp", "attack", "defense", "special-attack", "special-def
 
 data class Nature(val name: String, val up: String?, val down: String?) {
     val isNeutral: Boolean get() = up == null || down == null
+
+    /** Flavor a Pokémon with this nature likes: the one tied to the stat it raises. */
+    val likes: String? get() = up?.let { Natures.flavorOf(it) }
+
+    /** Flavor it dislikes: the one tied to the stat it lowers. */
+    val dislikes: String? get() = down?.let { Natures.flavorOf(it) }
 }
 
 object Natures {
@@ -26,6 +32,22 @@ object Natures {
     )
 
     val neutral: Nature = all.first()
+
+    /** The five berry flavors, one per non-HP stat. */
+    fun flavorOf(stat: String): String? = when (stat) {
+        "attack" -> "Spicy"
+        "defense" -> "Sour"
+        "special-attack" -> "Dry"
+        "special-defense" -> "Bitter"
+        "speed" -> "Sweet"
+        else -> null
+    }
+
+    /** Natures that raise [up] and/or lower [down]; a null side matches anything. Neutrals never match a stat. */
+    fun matching(up: String?, down: String?): List<Nature> = all.filter { n ->
+        if (up == null && down == null) true
+        else !n.isNeutral && (up == null || n.up == up) && (down == null || n.down == down)
+    }
 
     fun byName(name: String): Nature = all.firstOrNull { it.name == name } ?: neutral
 }

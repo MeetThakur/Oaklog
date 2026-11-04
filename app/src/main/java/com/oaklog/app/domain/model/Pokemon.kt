@@ -199,6 +199,24 @@ data class SpawnEntry(
     val methods: List<String>,
 )
 
+/** A Pokémon seen somewhere in a location. [id] is null for alternate forms, which have no art here. */
+data class SummaryMon(val name: String, val id: Int?)
+
+/** Pokémon and level span for one game (or all games together). Levels are 0 when not recorded. */
+data class GameSummary(val pokemon: List<SummaryMon>, val minLevel: Int, val maxLevel: Int)
+
+/** What a location offers at a glance: across all games, plus the same broken down per game. */
+data class LocationSummary(
+    val pokemon: List<SummaryMon>,
+    val minLevel: Int,
+    val maxLevel: Int,
+    val perGame: Map<String, GameSummary> = emptyMap(),
+) {
+    /** The summary for [game], or for all games when null. Null when the game has nothing here. */
+    fun forGame(game: String?): GameSummary? =
+        if (game == null) GameSummary(pokemon, minLevel, maxLevel) else perGame[game]
+}
+
 /** A wild Pokémon found in an area, with one entry per game that has it there. */
 data class AreaSpawn(
     val pokemonName: String,

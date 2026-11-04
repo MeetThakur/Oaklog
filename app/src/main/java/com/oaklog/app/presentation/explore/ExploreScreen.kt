@@ -16,6 +16,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Tune
 import androidx.compose.material.icons.automirrored.filled.TrendingUp
 import androidx.compose.material.icons.automirrored.filled.CompareArrows
 import androidx.compose.material.icons.filled.AutoAwesome
@@ -62,6 +63,7 @@ fun ExploreScreen(
     onNavigateToItems: () -> Unit,
     onNavigateToRegions: () -> Unit,
     onNavigateToEvolutions: () -> Unit,
+    onNavigateToNatures: () -> Unit,
     onNavigateToCompare: () -> Unit,
     onNavigateToCalculator: () -> Unit,
     modifier: Modifier = Modifier,
@@ -75,6 +77,7 @@ fun ExploreScreen(
         Tool("Abilities", "Effects and who has them.", Icons.Default.Psychology, "grass", onNavigateToAbilities),
         Tool("Items", "Balls, berries, held items.", Icons.Default.Inventory2, "water", onNavigateToItems),
         Tool("Regions", "Places and wild Pokémon.", Icons.Default.Map, "ground", onNavigateToRegions),
+        Tool("Natures", "What each raises and lowers.", Icons.Default.Tune, "dragon", onNavigateToNatures),
         Tool("Evolutions", "What evolves how and with what.", Icons.AutoMirrored.Filled.TrendingUp, "ghost", onNavigateToEvolutions),
     )
 

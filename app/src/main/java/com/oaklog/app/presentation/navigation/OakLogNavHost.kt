@@ -134,6 +134,7 @@ fun OakLogNavHost(
                         onNavigateToItems = { navController.navigate(Screen.ItemsDatabase.route) },
                         onNavigateToRegions = { navController.navigate(Screen.Regions.route) },
                         onNavigateToEvolutions = { navController.navigate(Screen.EvolutionFinder.route) },
+                        onNavigateToNatures = { navController.navigate(Screen.Natures.route) },
                         onNavigateToCompare = { navController.navigate(Screen.Compare.createRoute()) },
                         onNavigateToCalculator = { navController.navigate(Screen.Calculator.route) },
                     )
@@ -249,6 +250,10 @@ fun OakLogNavHost(
                         onInit = viewModel::loadInitialItems,
                         onNavigateBack = { navController.popBackStack() },
                     )
+                }
+
+                composable(Screen.Natures.route) {
+                    NaturesScreen(onNavigateBack = { navController.popBackStack() })
                 }
 
                 composable(Screen.EvolutionFinder.route) {

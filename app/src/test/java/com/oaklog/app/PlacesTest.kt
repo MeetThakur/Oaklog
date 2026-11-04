@@ -62,3 +62,63 @@ class PlacesTest {
         assertNull(AreaMapper.spawns(listOf(form)).single().speciesId)
     }
 }
+
+class LocationSummaryTest {
+    private fun spawn(name: String, id: Int?, min: Int, max: Int) = com.oaklog.app.domain.model.AreaSpawn(
+        name, id, listOf(com.oaklog.app.domain.model.SpawnEntry("red", min, max, 10, listOf("walk"))),
+    )
+
+    @Test
+    fun `summary merges areas, dedupes pokemon and spans the levels`() {
+        val s = Places.summarize(
+            listOf(
+                listOf(spawn("rattata", 19, 2, 4), spawn("pidgey", 16, 3, 5)),
+                listOf(spawn("rattata", 19, 5, 8)),
+            ),
+        )
+        assertEquals(listOf("pidgey", "rattata"), s.pokemon.map { it.name })
+        assertEquals(2, s.minLevel)
+        assertEquals(8, s.maxLevel)
+    }
+
+    @Test
+    fun `a location with no wild pokemon summarizes to nothing`() {
+        val s = Places.summarize(listOf(emptyList()))
+        assertEquals(0, s.pokemon.size)
+        assertEquals(0, s.maxLevel)
+    }
+
+    @Test
+    fun `fixed encounters with level zero do not drag the minimum to zero`() {
+        val s = Places.summarize(listOf(listOf(spawn("snorlax", 143, 0, 0), spawn("rattata", 19, 3, 5))))
+        assertEquals(3, s.minLevel)
+    }
+}
+
+class PerGameSummaryTest {
+    private fun entry(version: String, min: Int, max: Int) = com.oaklog.app.domain.model.SpawnEntry(version, min, max, 10, listOf("walk"))
+
+    @Test
+    fun `levels and pokemon are split per game instead of blended`() {
+        val spawns = listOf(
+            com.oaklog.app.domain.model.AreaSpawn("rattata", 19, listOf(entry("red", 2, 5), entry("sword", 30, 40))),
+            com.oaklog.app.domain.model.AreaSpawn("pidgey", 16, listOf(entry("red", 3, 6))),
+        )
+        val s = Places.summarize(listOf(spawns))
+        assertEquals(2, s.minLevel)
+        assertEquals(40, s.maxLevel)
+        val red = s.forGame("red")!!
+        assertEquals(2, red.minLevel)
+        assertEquals(6, red.maxLevel)
+        assertEquals(2, red.pokemon.size)
+        val sword = s.forGame("sword")!!
+        assertEquals(listOf("rattata"), sword.pokemon.map { it.name })
+        assertEquals(30, sword.minLevel)
+    }
+
+    @Test
+    fun `a game with nothing here has no summary`() {
+        val s = Places.summarize(listOf(listOf(com.oaklog.app.domain.model.AreaSpawn("rattata", 19, listOf(entry("red", 2, 5))))))
+        assertEquals(null, s.forGame("gold"))
+    }
+}
