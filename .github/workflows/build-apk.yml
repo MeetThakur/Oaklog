@@ -50,10 +50,7 @@ jobs:
           path: app/build/reports/tests/
           retention-days: 7
 
-      # The APK is a build of the app's source, so only publish it where access is restricted.
-      # In a public repository anyone could download it, so the step is skipped there.
       - name: Upload debug APK
-        if: ${{ github.event.repository.private }}
         uses: actions/upload-artifact@v4
         with:
           name: oaklog-debug-apk
