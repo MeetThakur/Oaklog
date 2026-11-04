@@ -11,12 +11,12 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.AutoAwesome
+import androidx.compose.material.icons.outlined.AutoAwesome
 import androidx.compose.material.icons.filled.Delete
-import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material.icons.outlined.Edit
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.KeyboardArrowUp
-import androidx.compose.material.icons.filled.Tune
+import androidx.compose.material.icons.outlined.Tune
 import androidx.compose.material.icons.outlined.DeleteOutline
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -83,7 +83,7 @@ fun TeamDetailScreen(
                         renameText = team.name
                         showRenameDialog = true
                     }) {
-                        Icon(Icons.Default.Edit, contentDescription = "Rename Squad")
+                        Icon(Icons.Outlined.Edit, contentDescription = "Rename Squad")
                     }
                     IconButton(onClick = {
                         viewModel.deleteTeam(team.id)
@@ -482,7 +482,7 @@ private fun TeamMemberCard(
                 horizontalArrangement = Arrangement.spacedBy(6.dp),
             ) {
                 Icon(
-                    imageVector = Icons.Default.AutoAwesome,
+                    imageVector = Icons.Outlined.AutoAwesome,
                     contentDescription = null,
                     tint = tint.onContainer,
                     modifier = Modifier.size(14.dp),
@@ -531,7 +531,7 @@ private fun TeamMemberCard(
             ),
         ) {
             Icon(
-                imageVector = Icons.Default.Tune,
+                imageVector = Icons.Outlined.Tune,
                 contentDescription = null,
                 modifier = Modifier.size(16.dp),
             )

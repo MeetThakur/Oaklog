@@ -1,6 +1,6 @@
 package com.oaklog.app.presentation.explore.tools
 
-import androidx.compose.material.icons.filled.CatchingPokemon
+import com.oaklog.app.presentation.components.OakIcons
 import com.oaklog.app.presentation.components.DatabasePage
 import androidx.compose.foundation.background
 import androidx.compose.foundation.horizontalScroll
@@ -19,7 +19,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
-import androidx.compose.material.icons.filled.Search
+import androidx.compose.material.icons.outlined.Search
 import androidx.compose.material.icons.outlined.SearchOff
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -71,7 +71,7 @@ fun BallsScreen(
         title = "Poké Balls",
         subtitle = "Catch multipliers and effects",
         color = "poison",
-        icon = Icons.Default.CatchingPokemon,
+        icon = OakIcons.PokeBall,
         onNavigateBack = onNavigateBack,
         compact = true,
         modifier = modifier,
@@ -88,7 +88,7 @@ fun BallsScreen(
                     value = state.query,
                     onValueChange = viewModel::setQuery,
                     placeholder = { Text("Search ${state.balls.size} balls") },
-                    leadingIcon = { Icon(Icons.Default.Search, contentDescription = null) },
+                    leadingIcon = { Icon(Icons.Outlined.Search, contentDescription = null) },
                     trailingIcon = {
                         if (state.query.isNotEmpty()) IconButton(onClick = { viewModel.setQuery("") }) {
                             Icon(Icons.Default.Close, contentDescription = "Clear")

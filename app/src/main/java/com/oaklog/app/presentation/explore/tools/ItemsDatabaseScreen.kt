@@ -13,7 +13,8 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Inventory2
+import androidx.compose.material.icons.outlined.Search
+import androidx.compose.material.icons.outlined.Inventory2
 import androidx.compose.material.icons.outlined.SearchOff
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -79,7 +80,7 @@ fun ItemsDatabaseScreen(
         title = "Items",
         subtitle = if (heldOnly) "${shown.size} held items" else "Balls, medicine, held items and more",
         color = "water",
-        icon = Icons.Default.Inventory2,
+        icon = Icons.Outlined.Inventory2,
         onNavigateBack = onNavigateBack,
         query = query,
         onQueryChange = { query = it; if (!heldOnly) onSearch(it) },

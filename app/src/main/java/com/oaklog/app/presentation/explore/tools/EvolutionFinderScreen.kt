@@ -21,7 +21,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowForward
 import androidx.compose.material.icons.filled.Close
-import androidx.compose.material.icons.filled.Search
+import androidx.compose.material.icons.outlined.Search
 import androidx.compose.material.icons.outlined.SearchOff
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -108,7 +108,7 @@ fun EvolutionFinderScreen(
                     value = state.query,
                     onValueChange = viewModel::setQuery,
                     placeholder = { Text("Search a Pokémon") },
-                    leadingIcon = { Icon(Icons.Default.Search, contentDescription = null) },
+                    leadingIcon = { Icon(Icons.Outlined.Search, contentDescription = null) },
                     trailingIcon = {
                         if (state.query.isNotEmpty()) IconButton(onClick = { viewModel.setQuery("") }) {
                             Icon(Icons.Default.Close, contentDescription = "Clear")

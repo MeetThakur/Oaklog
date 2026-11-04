@@ -6,7 +6,8 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.AutoAwesome
+import androidx.compose.material.icons.outlined.Search
+import androidx.compose.material.icons.outlined.AutoAwesome
 import androidx.compose.material.icons.outlined.SearchOff
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -46,7 +47,7 @@ fun MovesDatabaseScreen(
         title = "Moves",
         subtitle = if (moves.isEmpty()) "Power, accuracy, PP and effects" else "${moves.size} shown · search any move by name",
         color = "fire",
-        icon = Icons.Default.AutoAwesome,
+        icon = Icons.Outlined.AutoAwesome,
         onNavigateBack = onNavigateBack,
         query = query,
         onQueryChange = { query = it; onSearch(it) },

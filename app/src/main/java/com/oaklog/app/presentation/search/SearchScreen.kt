@@ -16,7 +16,7 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Close
-import androidx.compose.material.icons.filled.Search
+import androidx.compose.material.icons.outlined.Search
 import androidx.compose.material.icons.outlined.SearchOff
 import androidx.compose.material.icons.outlined.TravelExplore
 import androidx.compose.material3.Icon
@@ -78,7 +78,7 @@ fun SearchScreen(
                     onValueChange = viewModel::onQueryChange,
                     modifier = Modifier.weight(1f).focusRequester(focus),
                     placeholder = { Text("Pokémon, moves, abilities, items") },
-                    leadingIcon = { Icon(Icons.Default.Search, contentDescription = null) },
+                    leadingIcon = { Icon(Icons.Outlined.Search, contentDescription = null) },
                     trailingIcon = {
                         if (state.query.isNotEmpty()) {
                             IconButton(onClick = { viewModel.onQueryChange("") }) {

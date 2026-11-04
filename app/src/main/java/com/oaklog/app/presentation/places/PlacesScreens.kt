@@ -1,7 +1,6 @@
 package com.oaklog.app.presentation.places
 
-import androidx.compose.material.icons.filled.Place
-import androidx.compose.material.icons.filled.Map
+import androidx.compose.material.icons.outlined.Map
 import com.oaklog.app.presentation.components.DatabasePage
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -22,9 +21,9 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material.icons.filled.Close
-import androidx.compose.material.icons.filled.ExpandLess
-import androidx.compose.material.icons.filled.ExpandMore
-import androidx.compose.material.icons.filled.Search
+import androidx.compose.material.icons.outlined.ExpandLess
+import androidx.compose.material.icons.outlined.ExpandMore
+import androidx.compose.material.icons.outlined.Search
 import androidx.compose.material.icons.outlined.Place
 import androidx.compose.material.icons.outlined.SearchOff
 import androidx.compose.material3.Icon
@@ -92,7 +91,7 @@ fun RegionPlacesScreen(
         title = NameFormatter.pretty(region),
         subtitle = "Places and wild Pokémon",
         color = "ground",
-        icon = Icons.Default.Map,
+        icon = Icons.Outlined.Map,
         onNavigateBack = onNavigateBack,
         compact = true,
         modifier = modifier,
@@ -111,7 +110,7 @@ fun RegionPlacesScreen(
                         value = query,
                         onValueChange = { query = it },
                         placeholder = { Text("Search ${state.locations.size} places") },
-                        leadingIcon = { Icon(Icons.Default.Search, contentDescription = null) },
+                        leadingIcon = { Icon(Icons.Outlined.Search, contentDescription = null) },
                         trailingIcon = {
                             if (query.isNotEmpty()) IconButton(onClick = { query = "" }) {
                                 Icon(Icons.Default.Close, contentDescription = "Clear")
@@ -181,7 +180,7 @@ fun LocationScreen(
         title = NameFormatter.pretty(location),
         subtitle = "Areas and wild Pokémon",
         color = "ground",
-        icon = Icons.Default.Place,
+        icon = Icons.Outlined.Place,
         onNavigateBack = onNavigateBack,
         compact = true,
         modifier = modifier,
@@ -269,7 +268,7 @@ private fun AreaCard(
                 }
             }
             Icon(
-                if (expanded) Icons.Default.ExpandLess else Icons.Default.ExpandMore,
+                if (expanded) Icons.Outlined.ExpandLess else Icons.Outlined.ExpandMore,
                 contentDescription = if (expanded) "Collapse" else "Expand",
                 tint = MaterialTheme.colorScheme.onSurfaceVariant,
             )

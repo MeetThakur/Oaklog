@@ -1,6 +1,6 @@
 package com.oaklog.app.presentation.explore.tools
 
-import androidx.compose.material.icons.filled.Calculate
+import androidx.compose.material.icons.outlined.Calculate
 import com.oaklog.app.presentation.components.DatabasePage
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -83,7 +83,7 @@ fun CalculatorScreen(
         title = "Calculator",
         subtitle = "Stats and damage",
         color = "electric",
-        icon = Icons.Default.Calculate,
+        icon = Icons.Outlined.Calculate,
         onNavigateBack = onNavigateBack,
         compact = true,
         modifier = modifier,

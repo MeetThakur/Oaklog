@@ -10,13 +10,13 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.filled.AutoAwesome
+import androidx.compose.material.icons.outlined.AutoAwesome
 import androidx.compose.material.icons.automirrored.filled.VolumeUp
 import androidx.compose.material.icons.automirrored.outlined.CompareArrows
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.FavoriteBorder
-import androidx.compose.material.icons.filled.Female
-import androidx.compose.material.icons.filled.Male
+import androidx.compose.material.icons.outlined.Female
+import androidx.compose.material.icons.outlined.Male
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -138,13 +138,13 @@ fun PokemonDetailScreen(
                                 if (detail.femaleSpriteUrl != null) {
                                     HeaderIconButton(
                                         onClick = viewModel::toggleFemale,
-                                        icon = if (state.isFemale) Icons.Default.Female else Icons.Default.Male,
+                                        icon = if (state.isFemale) Icons.Outlined.Female else Icons.Outlined.Male,
                                         description = if (state.isFemale) "Showing female, tap for male" else "Showing male, tap for female",
                                     )
                                 }
                                 HeaderIconButton(
                                     onClick = viewModel::toggleShiny,
-                                    icon = Icons.Default.AutoAwesome,
+                                    icon = Icons.Outlined.AutoAwesome,
                                     description = "Toggle Shiny Artwork",
                                     iconColor = if (state.isShiny) OakShinyGold else MaterialTheme.colorScheme.onSurface,
                                 )

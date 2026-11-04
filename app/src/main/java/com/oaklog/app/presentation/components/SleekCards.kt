@@ -20,7 +20,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Check
-import androidx.compose.material.icons.filled.Visibility
+import androidx.compose.material.icons.outlined.Visibility
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -84,7 +84,7 @@ private fun StatusMark(entry: CollectionEntry?, onClick: () -> Unit) {
         Icon(
             imageVector = when (status) {
                 CollectionStatus.CAUGHT -> Icons.Filled.Check
-                CollectionStatus.SEEN -> Icons.Filled.Visibility
+                CollectionStatus.SEEN -> Icons.Outlined.Visibility
                 CollectionStatus.NOT_CAUGHT -> Icons.Filled.Add
             },
             contentDescription = when (status) {

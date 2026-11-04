@@ -18,19 +18,17 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.CatchingPokemon
-import androidx.compose.material.icons.filled.Eco
-import androidx.compose.material.icons.filled.Tune
+import androidx.compose.material.icons.outlined.BookmarkBorder
+import androidx.compose.material.icons.outlined.Tune
 import androidx.compose.material.icons.automirrored.filled.TrendingUp
 import androidx.compose.material.icons.automirrored.filled.CompareArrows
-import androidx.compose.material.icons.filled.AutoAwesome
-import androidx.compose.material.icons.filled.Bookmark
-import androidx.compose.material.icons.filled.Calculate
-import androidx.compose.material.icons.filled.FlashOn
-import androidx.compose.material.icons.filled.Inventory2
-import androidx.compose.material.icons.filled.Map
-import androidx.compose.material.icons.filled.Psychology
-import androidx.compose.material.icons.filled.Search
+import androidx.compose.material.icons.outlined.AutoAwesome
+import androidx.compose.material.icons.outlined.Calculate
+import androidx.compose.material.icons.outlined.FlashOn
+import androidx.compose.material.icons.outlined.Inventory2
+import androidx.compose.material.icons.outlined.Map
+import androidx.compose.material.icons.outlined.Psychology
+import androidx.compose.material.icons.outlined.Search
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
@@ -42,6 +40,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.dp
+import com.oaklog.app.presentation.components.OakIcons
 import com.oaklog.app.presentation.components.OakTopBar
 import com.oaklog.app.presentation.theme.CardShape
 import com.oaklog.app.presentation.theme.ChipShape
@@ -75,17 +74,17 @@ fun ExploreScreen(
     modifier: Modifier = Modifier,
 ) {
     val tools = listOf(
-        Tool("Collection", "Pokédex tracker & catches.", Icons.Default.Bookmark, "dragon", onNavigateToCollection),
+        Tool("Collection", "Pokédex tracker & catches.", Icons.Outlined.BookmarkBorder, "dragon", onNavigateToCollection),
         Tool("Compare", "Two Pokémon side by side.", Icons.AutoMirrored.Filled.CompareArrows, "flying", onNavigateToCompare),
-        Tool("Calculator", "Stats and damage.", Icons.Default.Calculate, "electric", onNavigateToCalculator),
-        Tool("Type chart", "Damage multipliers.", Icons.Default.FlashOn, "psychic", onNavigateToTypeChart),
-        Tool("Moves", "Power, accuracy, effects.", Icons.Default.AutoAwesome, "fire", onNavigateToMoves),
-        Tool("Abilities", "Effects and who has them.", Icons.Default.Psychology, "grass", onNavigateToAbilities),
-        Tool("Items", "Balls, berries, held items.", Icons.Default.Inventory2, "water", onNavigateToItems),
-        Tool("Regions", "Places and wild Pokémon.", Icons.Default.Map, "ground", onNavigateToRegions),
-        Tool("Poké Balls", "Catch multipliers and effects.", Icons.Default.CatchingPokemon, "poison", onNavigateToBalls),
-        Tool("Berries", "Flavors, growth and Natural Gift.", Icons.Default.Eco, "bug", onNavigateToBerries),
-        Tool("Natures", "What each raises and lowers.", Icons.Default.Tune, "dragon", onNavigateToNatures),
+        Tool("Calculator", "Stats and damage.", Icons.Outlined.Calculate, "electric", onNavigateToCalculator),
+        Tool("Type chart", "Damage multipliers.", Icons.Outlined.FlashOn, "psychic", onNavigateToTypeChart),
+        Tool("Moves", "Power, accuracy, effects.", Icons.Outlined.AutoAwesome, "fire", onNavigateToMoves),
+        Tool("Abilities", "Effects and who has them.", Icons.Outlined.Psychology, "grass", onNavigateToAbilities),
+        Tool("Items", "Balls, berries, held items.", Icons.Outlined.Inventory2, "water", onNavigateToItems),
+        Tool("Regions", "Places and wild Pokémon.", Icons.Outlined.Map, "ground", onNavigateToRegions),
+        Tool("Poké Balls", "Catch multipliers and effects.", OakIcons.PokeBall, "poison", onNavigateToBalls),
+        Tool("Berries", "Flavors, growth and Natural Gift.", OakIcons.Berry, "bug", onNavigateToBerries),
+        Tool("Natures", "What each raises and lowers.", Icons.Outlined.Tune, "dragon", onNavigateToNatures),
         Tool("Evolutions", "What evolves how and with what.", Icons.AutoMirrored.Filled.TrendingUp, "ghost", onNavigateToEvolutions),
     )
 
@@ -128,7 +127,7 @@ private fun SearchEntry(onClick: () -> Unit) {
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(12.dp),
         ) {
-            Icon(Icons.Default.Search, contentDescription = null, tint = MaterialTheme.colorScheme.onSurfaceVariant)
+            Icon(Icons.Outlined.Search, contentDescription = null, tint = MaterialTheme.colorScheme.onSurfaceVariant)
             Text(
                 "Search Pokémon, moves, abilities, items",
                 style = MaterialTheme.typography.bodyMedium,

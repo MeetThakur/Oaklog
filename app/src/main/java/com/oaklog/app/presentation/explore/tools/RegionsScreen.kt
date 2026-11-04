@@ -10,7 +10,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowForward
-import androidx.compose.material.icons.filled.Map
+import androidx.compose.material.icons.outlined.Map
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -47,7 +47,7 @@ fun RegionsScreen(
         title = "Regions",
         subtitle = "${regions.size} regions · tap one for its places and wild Pokémon",
         color = "ground",
-        icon = Icons.Default.Map,
+        icon = Icons.Outlined.Map,
         onNavigateBack = onNavigateBack,
         modifier = modifier,
     ) {

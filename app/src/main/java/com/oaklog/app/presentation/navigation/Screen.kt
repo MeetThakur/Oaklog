@@ -1,16 +1,12 @@
 package com.oaklog.app.presentation.navigation
 
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ListAlt
-import androidx.compose.material.icons.automirrored.outlined.ListAlt
 import androidx.compose.material.icons.filled.Bookmark
-import androidx.compose.material.icons.filled.CatchingPokemon
-import androidx.compose.material.icons.filled.Explore
-import androidx.compose.material.icons.filled.Group
 import androidx.compose.material.icons.outlined.BookmarkBorder
 import androidx.compose.material.icons.outlined.Explore
 import androidx.compose.material.icons.outlined.Group
 import androidx.compose.ui.graphics.vector.ImageVector
+import com.oaklog.app.presentation.components.OakIcons
 
 sealed class Screen(val route: String) {
     data object Pokedex : Screen("pokedex")
@@ -68,19 +64,19 @@ val bottomNavItems = listOf(
     BottomNavItem(
         screen = Screen.Pokedex,
         title = "Pokédex",
-        selectedIcon = Icons.AutoMirrored.Filled.ListAlt,
-        unselectedIcon = Icons.AutoMirrored.Outlined.ListAlt,
+        selectedIcon = OakIcons.Pokedex,
+        unselectedIcon = OakIcons.Pokedex,
     ),
     BottomNavItem(
         screen = Screen.Teams,
         title = "Teams",
-        selectedIcon = Icons.Filled.Group,
+        selectedIcon = Icons.Outlined.Group,
         unselectedIcon = Icons.Outlined.Group,
     ),
     BottomNavItem(
         screen = Screen.Explore,
         title = "Explore",
-        selectedIcon = Icons.Filled.Explore,
+        selectedIcon = Icons.Outlined.Explore,
         unselectedIcon = Icons.Outlined.Explore,
     ),
 )

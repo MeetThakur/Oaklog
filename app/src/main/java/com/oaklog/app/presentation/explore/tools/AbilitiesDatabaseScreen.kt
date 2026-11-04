@@ -6,7 +6,8 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Psychology
+import androidx.compose.material.icons.outlined.Search
+import androidx.compose.material.icons.outlined.Psychology
 import androidx.compose.material.icons.outlined.SearchOff
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -49,7 +50,7 @@ fun AbilitiesDatabaseScreen(
         title = "Abilities",
         subtitle = if (abilities.isEmpty()) "What each does and who has it" else "${abilities.size} shown · tap one to see who has it",
         color = "grass",
-        icon = Icons.Default.Psychology,
+        icon = Icons.Outlined.Psychology,
         onNavigateBack = onNavigateBack,
         query = query,
         onQueryChange = { query = it; onSearch(it) },

@@ -12,7 +12,7 @@ import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.FavoriteBorder
-import androidx.compose.material.icons.filled.Visibility
+import androidx.compose.material.icons.outlined.Visibility
 import androidx.compose.material.icons.outlined.CheckCircleOutline
 import androidx.compose.material.icons.outlined.Refresh
 import androidx.compose.material3.*
@@ -179,7 +179,7 @@ fun CollectionStatusButton(
     }
     val icon = when (status) {
         CollectionStatus.CAUGHT -> Icons.Filled.Check
-        CollectionStatus.SEEN -> Icons.Filled.Visibility
+        CollectionStatus.SEEN -> Icons.Outlined.Visibility
         CollectionStatus.NOT_CAUGHT -> Icons.Filled.Add
     }
     val ink = tint?.onContainer ?: MaterialTheme.colorScheme.onSurface
@@ -237,7 +237,7 @@ fun StatusDot(
     val status = entry?.status ?: CollectionStatus.NOT_CAUGHT
     val (icon, color, label) = when (status) {
         CollectionStatus.CAUGHT -> Triple(Icons.Filled.CheckCircle, OakCaughtGreen, "Caught")
-        CollectionStatus.SEEN -> Triple(Icons.Filled.Visibility, OakSeenBlue, "Seen")
+        CollectionStatus.SEEN -> Triple(Icons.Outlined.Visibility, OakSeenBlue, "Seen")
         CollectionStatus.NOT_CAUGHT -> Triple(
             Icons.Outlined.CheckCircleOutline,
             MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.45f),

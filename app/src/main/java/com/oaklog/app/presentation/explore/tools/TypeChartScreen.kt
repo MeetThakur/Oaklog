@@ -1,6 +1,6 @@
 package com.oaklog.app.presentation.explore.tools
 
-import androidx.compose.material.icons.filled.FlashOn
+import androidx.compose.material.icons.outlined.FlashOn
 import androidx.compose.material.icons.Icons
 import com.oaklog.app.presentation.components.DatabasePage
 import com.oaklog.app.presentation.components.Card
@@ -61,7 +61,7 @@ fun TypeChartScreen(
         title = "Type chart",
         subtitle = "Damage multipliers",
         color = "psychic",
-        icon = Icons.Default.FlashOn,
+        icon = Icons.Outlined.FlashOn,
         onNavigateBack = onNavigateBack,
         compact = true,
         modifier = modifier,

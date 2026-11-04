@@ -10,7 +10,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Tune
+import androidx.compose.material.icons.outlined.Tune
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -57,7 +57,7 @@ fun NaturesScreen(
         title = "Natures",
         subtitle = "25 natures · +10% to one stat, −10% to another",
         color = "dragon",
-        icon = Icons.Default.Tune,
+        icon = Icons.Outlined.Tune,
         onNavigateBack = onNavigateBack,
         modifier = modifier,
     ) {

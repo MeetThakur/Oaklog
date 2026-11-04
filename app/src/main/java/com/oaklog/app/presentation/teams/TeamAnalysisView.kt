@@ -7,11 +7,10 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.AutoAwesome
 import androidx.compose.material.icons.filled.Bolt
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.Shield
-import androidx.compose.material.icons.filled.Warning
+import androidx.compose.material.icons.outlined.Warning
 import androidx.compose.material.icons.outlined.Lightbulb
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -75,7 +74,7 @@ fun TeamSynergyTab(
                         ) {
                             Box(contentAlignment = Alignment.Center) {
                                 Icon(
-                                    imageVector = Icons.Default.Warning,
+                                    imageVector = Icons.Outlined.Warning,
                                     contentDescription = null,
                                     tint = MaterialTheme.colorScheme.onError,
                                     modifier = Modifier.size(16.dp),

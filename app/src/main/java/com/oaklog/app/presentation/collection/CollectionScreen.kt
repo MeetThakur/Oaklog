@@ -1,13 +1,13 @@
 package com.oaklog.app.presentation.collection
 
-import androidx.compose.material.icons.filled.Bookmark
+import com.oaklog.app.presentation.components.OakIcons
+import androidx.compose.material.icons.outlined.BookmarkBorder
 import com.oaklog.app.presentation.components.DatabasePage
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.material.icons.outlined.Visibility
 import androidx.compose.material.icons.outlined.AutoAwesome
 import androidx.compose.material.icons.outlined.FavoriteBorder
 import androidx.compose.material.icons.outlined.EmojiEvents
-import androidx.compose.material.icons.outlined.CatchingPokemon
 import androidx.compose.material.icons.Icons
 import com.oaklog.app.presentation.components.Card
 import com.oaklog.app.presentation.components.FilterChip
@@ -55,7 +55,7 @@ fun CollectionScreen(
         title = "Collection",
         subtitle = "Your Pokédex progress",
         color = "dragon",
-        icon = Icons.Default.Bookmark,
+        icon = Icons.Outlined.BookmarkBorder,
         onNavigateBack = onNavigateBack,
         compact = true,
         modifier = modifier,
@@ -233,7 +233,7 @@ private fun emptyContent(tab: CollectionFilterTab, gen: Int?): EmptyContent {
         CollectionFilterTab.CAUGHT -> EmptyContent(
             "Nothing caught$scope yet",
             "Mark a Pokémon as caught from its card or detail page and it will appear here.",
-            Icons.Outlined.CatchingPokemon,
+            OakIcons.PokeBall,
         )
         CollectionFilterTab.SEEN -> EmptyContent(
             "No sightings logged$scope",
@@ -259,7 +259,7 @@ private fun emptyContent(tab: CollectionFilterTab, gen: Int?): EmptyContent {
         CollectionFilterTab.ALL -> EmptyContent(
             "Nothing here$scope",
             "Try another generation, or browse the Pokédex.",
-            Icons.Outlined.CatchingPokemon,
+            OakIcons.PokeBall,
         )
     }
 }

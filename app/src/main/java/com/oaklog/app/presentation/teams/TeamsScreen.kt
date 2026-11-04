@@ -12,7 +12,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowForward
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material.icons.outlined.Edit
 import androidx.compose.material.icons.outlined.DeleteOutline
 import androidx.compose.material.icons.outlined.Groups
 import androidx.compose.material.icons.outlined.Shield
@@ -315,7 +315,7 @@ private fun TeamCard(
                     Box {
                         IconButton(onClick = { showMenu = true }) {
                             Icon(
-                                imageVector = Icons.Default.Edit,
+                                imageVector = Icons.Outlined.Edit,
                                 contentDescription = "Squad Options",
                                 tint = MaterialTheme.colorScheme.onSurfaceVariant,
                                 modifier = Modifier.size(18.dp),
@@ -332,7 +332,7 @@ private fun TeamCard(
                                     onRename()
                                 },
                                 leadingIcon = {
-                                    Icon(Icons.Default.Edit, contentDescription = null)
+                                    Icon(Icons.Outlined.Edit, contentDescription = null)
                                 }
                             )
                             DropdownMenuItem(
