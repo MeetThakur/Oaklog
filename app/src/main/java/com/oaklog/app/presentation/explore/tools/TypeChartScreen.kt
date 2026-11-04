@@ -1,5 +1,8 @@
 package com.oaklog.app.presentation.explore.tools
 
+import androidx.compose.material.icons.filled.FlashOn
+import androidx.compose.material.icons.Icons
+import com.oaklog.app.presentation.components.DatabasePage
 import com.oaklog.app.presentation.components.Card
 import com.oaklog.app.presentation.components.DropdownOption
 import com.oaklog.app.presentation.components.OakDropdown
@@ -54,20 +57,19 @@ fun TypeChartScreen(
     // Attacking Mode State
     var attackingType by remember { mutableStateOf(allTypes.firstOrNull() ?: "normal") }
 
-    Scaffold(
-        topBar = {
-            OakTopBar(
-                title = "Type Effectiveness Chart",
-                canNavigateBack = true,
-                onNavigateBack = onNavigateBack,
-            )
-        },
+    DatabasePage(
+        title = "Type chart",
+        subtitle = "Damage multipliers",
+        color = "psychic",
+        icon = Icons.Default.FlashOn,
+        onNavigateBack = onNavigateBack,
+        compact = true,
         modifier = modifier,
-    ) { innerPadding ->
+    ) {
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(innerPadding)
+                
                 .verticalScroll(rememberScrollState()),
             verticalArrangement = Arrangement.spacedBy(16.dp),
         ) {
@@ -95,7 +97,7 @@ fun TypeChartScreen(
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(horizontal = 16.dp),
-                    shape = RoundedCornerShape(16.dp),
+                    shape = RoundedCornerShape(20.dp),
                     colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
                 ) {
                     Column(modifier = Modifier.padding(16.dp)) {
@@ -173,7 +175,7 @@ fun TypeChartScreen(
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(horizontal = 16.dp),
-                    shape = RoundedCornerShape(16.dp),
+                    shape = RoundedCornerShape(20.dp),
                     colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
                 ) {
                     Column(modifier = Modifier.padding(16.dp)) {
@@ -237,7 +239,7 @@ private fun EffectivenessGroupCard(
 ) {
     Card(
         modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(14.dp),
+        shape = RoundedCornerShape(20.dp),
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
     ) {
         Column(modifier = Modifier.padding(14.dp)) {

@@ -1,5 +1,7 @@
 package com.oaklog.app.presentation.collection
 
+import androidx.compose.material.icons.filled.Bookmark
+import com.oaklog.app.presentation.components.DatabasePage
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.material.icons.outlined.Visibility
 import androidx.compose.material.icons.outlined.AutoAwesome
@@ -49,20 +51,19 @@ fun CollectionScreen(
 ) {
     val state by viewModel.uiState.collectAsState()
 
-    Scaffold(
-        topBar = {
-            OakTopBar(
-                title = "Research Collection",
-                canNavigateBack = true,
-                onNavigateBack = onNavigateBack,
-            )
-        },
+    DatabasePage(
+        title = "Collection",
+        subtitle = "Your Pokédex progress",
+        color = "dragon",
+        icon = Icons.Default.Bookmark,
+        onNavigateBack = onNavigateBack,
+        compact = true,
         modifier = modifier,
-    ) { innerPadding ->
+    ) {
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(innerPadding)
+                
         ) {
             // Completion header: the headline number, a thick progress bar, three tinted tallies.
             Column(modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp)) {

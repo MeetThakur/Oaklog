@@ -1,5 +1,7 @@
 package com.oaklog.app.presentation.explore.tools
 
+import androidx.compose.material.icons.filled.Calculate
+import com.oaklog.app.presentation.components.DatabasePage
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -77,11 +79,16 @@ fun CalculatorScreen(
     var tab by remember { mutableIntStateOf(0) }
     var picking by remember { mutableStateOf<CalcRole?>(null) }
 
-    Scaffold(
-        topBar = { OakTopBar(title = "Calculator", canNavigateBack = true, onNavigateBack = onNavigateBack) },
+    DatabasePage(
+        title = "Calculator",
+        subtitle = "Stats and damage",
+        color = "electric",
+        icon = Icons.Default.Calculate,
+        onNavigateBack = onNavigateBack,
+        compact = true,
         modifier = modifier,
-    ) { inner ->
-        Column(modifier = Modifier.fillMaxSize().padding(inner)) {
+    ) {
+        Column(modifier = Modifier.fillMaxSize()) {
             PrimaryTabRow(
                 selectedTabIndex = tab,
                 containerColor = MaterialTheme.colorScheme.background,
@@ -123,7 +130,7 @@ fun CalculatorScreen(
 
 @Composable
 private fun PokemonSlot(label: String, detail: PokemonDetail?, onClick: () -> Unit) {
-    Card(modifier = Modifier.fillMaxWidth().clip(RoundedCornerShape(24.dp)).clickable(onClick = onClick)) {
+    Card(modifier = Modifier.fillMaxWidth().clip(RoundedCornerShape(20.dp)).clickable(onClick = onClick)) {
         Row(
             modifier = Modifier.padding(14.dp),
             verticalAlignment = Alignment.CenterVertically,

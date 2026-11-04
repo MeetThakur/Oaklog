@@ -42,10 +42,18 @@ fun OakTopBar(
         },
         navigationIcon = {
             if (canNavigateBack) {
-                IconButton(onClick = onNavigateBack) {
+                IconButton(
+                    onClick = onNavigateBack,
+                    modifier = Modifier
+                        .padding(start = 8.dp, end = 10.dp)
+                        .size(40.dp)
+                        .clip(CircleShape)
+                        .background(MaterialTheme.colorScheme.surfaceVariant),
+                ) {
                     Icon(
                         imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                         contentDescription = "Back",
+                        modifier = Modifier.size(20.dp),
                     )
                 }
             }

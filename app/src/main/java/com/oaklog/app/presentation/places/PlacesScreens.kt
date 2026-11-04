@@ -1,5 +1,8 @@
 package com.oaklog.app.presentation.places
 
+import androidx.compose.material.icons.filled.Place
+import androidx.compose.material.icons.filled.Map
+import com.oaklog.app.presentation.components.DatabasePage
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -85,11 +88,16 @@ fun RegionPlacesScreen(
         }
     }
 
-    Scaffold(
-        topBar = { OakTopBar(title = NameFormatter.pretty(region), canNavigateBack = true, onNavigateBack = onNavigateBack) },
+    DatabasePage(
+        title = NameFormatter.pretty(region),
+        subtitle = "Places and wild Pokémon",
+        color = "ground",
+        icon = Icons.Default.Map,
+        onNavigateBack = onNavigateBack,
+        compact = true,
         modifier = modifier,
-    ) { inner ->
-        Column(Modifier.fillMaxSize().padding(inner)) {
+    ) {
+        Column(Modifier.fillMaxSize()) {
             when {
                 state.isLoading -> LoadingView(message = "Loading places...")
                 state.failed -> ErrorView(message = "Couldn't load this region's places.", onRetry = viewModel::load)
@@ -169,31 +177,30 @@ fun LocationScreen(
         state.areas.flatMap { it.spawns.orEmpty() }.flatMap { it.entries }.map { it.version }.distinct().sorted()
     }
 
-    Scaffold(
-        topBar = {
-            OakTopBar(
-                title = NameFormatter.pretty(location),
-                canNavigateBack = true,
-                onNavigateBack = onNavigateBack,
-            )
-        },
+    DatabasePage(
+        title = NameFormatter.pretty(location),
+        subtitle = "Areas and wild Pokémon",
+        color = "ground",
+        icon = Icons.Default.Place,
+        onNavigateBack = onNavigateBack,
+        compact = true,
         modifier = modifier,
-    ) { inner ->
+    ) {
         when {
-            state.isLoading -> LoadingView(message = "Loading areas...", modifier = Modifier.padding(inner))
+            state.isLoading -> LoadingView(message = "Loading areas...", modifier = Modifier)
             state.failed -> ErrorView(
                 message = "Couldn't load this location.",
                 onRetry = viewModel::load,
-                modifier = Modifier.padding(inner),
+                modifier = Modifier,
             )
             state.areas.isEmpty() -> EmptyView(
                 title = "No areas listed",
                 subtitle = "PokéAPI has no encounter areas for this location.",
                 icon = Icons.Outlined.Place,
-                modifier = Modifier.padding(inner),
+                modifier = Modifier,
             )
             else -> LazyColumn(
-                modifier = Modifier.fillMaxSize().padding(inner),
+                modifier = Modifier.fillMaxSize(),
                 contentPadding = PaddingValues(16.dp),
                 verticalArrangement = Arrangement.spacedBy(12.dp),
             ) {

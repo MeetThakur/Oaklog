@@ -1,5 +1,7 @@
 package com.oaklog.app.presentation.explore.tools
 
+import androidx.compose.material.icons.filled.Eco
+import com.oaklog.app.presentation.components.DatabasePage
 import androidx.compose.foundation.background
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
@@ -73,13 +75,18 @@ fun BerriesScreen(
         BerryFilter.filter(state.berries, state.flavor, state.query)
     }
 
-    Scaffold(
-        topBar = { OakTopBar(title = "Berries", canNavigateBack = true, onNavigateBack = onNavigateBack) },
+    DatabasePage(
+        title = "Berries",
+        subtitle = "Flavors, growth and Natural Gift",
+        color = "bug",
+        icon = Icons.Default.Eco,
+        onNavigateBack = onNavigateBack,
+        compact = true,
         modifier = modifier,
-    ) { inner ->
+    ) {
         when {
             state.isLoading -> Column(
-                Modifier.fillMaxSize().padding(inner).padding(32.dp),
+                Modifier.fillMaxSize().padding(32.dp),
                 verticalArrangement = Arrangement.Center,
             ) {
                 Text("Loading berries", style = MaterialTheme.typography.titleLarge)
@@ -97,9 +104,9 @@ fun BerriesScreen(
             state.failed -> ErrorView(
                 message = "Couldn't load the berries. Check your connection and try again.",
                 onRetry = viewModel::load,
-                modifier = Modifier.padding(inner),
+                modifier = Modifier,
             )
-            else -> Column(Modifier.fillMaxSize().padding(inner)) {
+            else -> Column(Modifier.fillMaxSize()) {
                 OutlinedTextField(
                     value = state.query,
                     onValueChange = viewModel::setQuery,

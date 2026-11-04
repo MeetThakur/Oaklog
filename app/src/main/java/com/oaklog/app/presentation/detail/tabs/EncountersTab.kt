@@ -33,7 +33,7 @@ fun EncountersTab(
     ) {
         if (encounters.isEmpty()) {
             Card(
-                shape = RoundedCornerShape(16.dp),
+                shape = RoundedCornerShape(20.dp),
                 colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
             ) {
                 Column(
@@ -59,7 +59,7 @@ fun EncountersTab(
         } else {
             // Version Selector
             Card(
-                shape = RoundedCornerShape(16.dp),
+                shape = RoundedCornerShape(20.dp),
                 colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
             ) {
                 Column(modifier = Modifier.padding(16.dp)) {
@@ -82,7 +82,7 @@ fun EncountersTab(
             // Spots for selected version
             val activeGroup = encounters.firstOrNull { it.version == selectedVersion } ?: encounters.first()
             Card(
-                shape = RoundedCornerShape(16.dp),
+                shape = RoundedCornerShape(20.dp),
                 colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
             ) {
                 Column(

@@ -277,7 +277,7 @@ fun TeamDetailScreen(
                     onValueChange = { renameText = it },
                     singleLine = true,
                     label = { Text("Squad Name") },
-                    shape = RoundedCornerShape(14.dp),
+                    shape = RoundedCornerShape(20.dp),
                     modifier = Modifier.fillMaxWidth(),
                 )
             },

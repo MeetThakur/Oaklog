@@ -50,7 +50,7 @@ fun OverviewTab(
         // Pokédex Description with Game Version Switcher
         if (detail.dexEntries.isNotEmpty()) {
             Card(
-                shape = RoundedCornerShape(16.dp),
+                shape = RoundedCornerShape(20.dp),
                 colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
             ) {
                 Column(modifier = Modifier.padding(16.dp)) {
@@ -85,7 +85,7 @@ fun OverviewTab(
 
         // Physical Dimensions (Height, Weight, Base Exp)
         Card(
-            shape = RoundedCornerShape(16.dp),
+            shape = RoundedCornerShape(20.dp),
             colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
         ) {
             Row(
@@ -113,7 +113,7 @@ fun OverviewTab(
 
         // Abilities
         Card(
-            shape = RoundedCornerShape(16.dp),
+            shape = RoundedCornerShape(20.dp),
             colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
         ) {
             Column(modifier = Modifier.padding(16.dp)) {
@@ -186,7 +186,7 @@ fun OverviewTab(
 
         // Breeding & Capture Info
         Card(
-            shape = RoundedCornerShape(16.dp),
+            shape = RoundedCornerShape(20.dp),
             colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
         ) {
             Column(
@@ -347,7 +347,7 @@ private fun DimensionItem(
 @Composable
 private fun MatchupsCard(m: Matchups) {
     Card(
-        shape = RoundedCornerShape(16.dp),
+        shape = RoundedCornerShape(20.dp),
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
     ) {
         Column(
@@ -409,7 +409,7 @@ private fun HeldItemsCard(items: List<HeldItem>, game: String?, onItemClick: (St
     // If the picked game recorded nothing, say so rather than showing another game's numbers.
     val shown = HeldItems.forGame(items, game)
     Card(
-        shape = RoundedCornerShape(16.dp),
+        shape = RoundedCornerShape(20.dp),
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
     ) {
         Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {

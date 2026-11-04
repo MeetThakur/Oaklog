@@ -22,6 +22,7 @@ data class ExploreUiState(
     val movesList: List<MoveInfo> = emptyList(),
     val abilitiesList: List<AbilityInfo> = emptyList(),
     val itemsList: List<ItemInfo> = emptyList(),
+    val heldItemsList: List<ItemInfo> = emptyList(),
     val regions: List<RegionInfo> = emptyList(),
     val generations: List<GenerationInfo> = emptyList(),
     val isLoading: Boolean = false,
@@ -115,6 +116,16 @@ class ExploreViewModel @Inject constructor(
             }.onFailure {
                 _uiState.update { it.copy(abilitiesList = emptyList(), isLoading = false) }
             }
+        }
+    }
+
+    fun loadHeldItems() {
+        if (_uiState.value.heldItemsList.isNotEmpty()) return
+        viewModelScope.launch(Dispatchers.IO) {
+            _uiState.update { it.copy(isLoading = true) }
+            pokemonRepo.getHeldItems()
+                .onSuccess { list -> _uiState.update { it.copy(heldItemsList = list, isLoading = false) } }
+                .onFailure { _uiState.update { it.copy(isLoading = false) } }
         }
     }
 

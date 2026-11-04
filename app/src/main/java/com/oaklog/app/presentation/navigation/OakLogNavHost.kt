@@ -247,10 +247,13 @@ fun OakLogNavHost(
                     val state by viewModel.uiState.collectAsState()
                     ItemsDatabaseScreen(
                         items = state.itemsList,
+                        heldItems = state.heldItemsList,
                         isLoading = state.isLoading,
                         onSearch = viewModel::searchItem,
                         onInit = viewModel::loadInitialItems,
+                        onLoadHeld = viewModel::loadHeldItems,
                         onNavigateBack = { navController.popBackStack() },
+                        onPokemonClick = openPokemon,
                     )
                 }
 

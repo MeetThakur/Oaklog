@@ -44,6 +44,9 @@ interface PokemonRepository {
     /** Every Poké Ball item, grouped in category order. Cached in memory after the first call. */
     suspend fun getBalls(): Result<List<ItemInfo>>
 
+    /** Items Pokémon hold in battle or in the wild, from PokéAPI's held-item categories. Cached in memory. */
+    suspend fun getHeldItems(): Result<List<ItemInfo>>
+
     suspend fun getBerries(onProgress: (done: Int, total: Int) -> Unit): Result<List<BerryInfo>>
 
     suspend fun getLocationSummary(location: String): Result<LocationSummary>

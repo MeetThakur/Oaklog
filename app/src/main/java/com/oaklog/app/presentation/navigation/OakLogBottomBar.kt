@@ -4,10 +4,14 @@ import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ShortNavigationBar
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.ShortNavigationBarItem
+import androidx.compose.material3.ShortNavigationBarItemDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.foundation.layout.Column
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.compose.currentBackStackEntryAsState
@@ -25,9 +29,10 @@ fun OakLogBottomBar(
     val isBottomBarVisible = bottomNavItems.any { it.screen.route == currentRoute }
     if (!isBottomBarVisible) return
 
+    Column(modifier = modifier) {
+    HorizontalDivider(color = MaterialTheme.colorScheme.outline, thickness = 0.5.dp)
     ShortNavigationBar(
-        modifier = modifier,
-        containerColor = MaterialTheme.colorScheme.surfaceContainer,
+        containerColor = MaterialTheme.colorScheme.background,
     ) {
         bottomNavItems.forEach { item ->
             val isSelected = currentRoute == item.screen.route
@@ -51,7 +56,15 @@ fun OakLogBottomBar(
                     )
                 },
                 label = { Text(text = item.title) },
+                colors = ShortNavigationBarItemDefaults.colors(
+                    selectedIndicatorColor = MaterialTheme.colorScheme.secondaryContainer,
+                    selectedIconColor = MaterialTheme.colorScheme.onSurface,
+                    selectedTextColor = MaterialTheme.colorScheme.onSurface,
+                    unselectedIconColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                    unselectedTextColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                ),
             )
         }
+    }
     }
 }

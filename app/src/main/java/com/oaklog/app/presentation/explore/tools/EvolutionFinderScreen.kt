@@ -1,5 +1,7 @@
 package com.oaklog.app.presentation.explore.tools
 
+import androidx.compose.material.icons.automirrored.filled.TrendingUp
+import com.oaklog.app.presentation.components.DatabasePage
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
@@ -69,13 +71,18 @@ fun EvolutionFinderScreen(
         EvolutionFinder.filter(state.steps, state.method, state.item, state.query)
     }
 
-    Scaffold(
-        topBar = { OakTopBar(title = "Evolution finder", canNavigateBack = true, onNavigateBack = onNavigateBack) },
+    DatabasePage(
+        title = "Evolutions",
+        subtitle = "What evolves how and with what",
+        color = "ghost",
+        icon = Icons.AutoMirrored.Filled.TrendingUp,
+        onNavigateBack = onNavigateBack,
+        compact = true,
         modifier = modifier,
-    ) { inner ->
+    ) {
         when {
             state.isLoading -> Column(
-                Modifier.fillMaxSize().padding(inner).padding(32.dp),
+                Modifier.fillMaxSize().padding(32.dp),
                 verticalArrangement = Arrangement.Center,
             ) {
                 Text("Indexing evolutions", style = MaterialTheme.typography.titleLarge)
@@ -94,9 +101,9 @@ fun EvolutionFinderScreen(
             state.failed -> ErrorView(
                 message = "Couldn't load every evolution chain. Check your connection and try again.",
                 onRetry = viewModel::load,
-                modifier = Modifier.padding(inner),
+                modifier = Modifier,
             )
-            else -> Column(Modifier.fillMaxSize().padding(inner)) {
+            else -> Column(Modifier.fillMaxSize()) {
                 OutlinedTextField(
                     value = state.query,
                     onValueChange = viewModel::setQuery,

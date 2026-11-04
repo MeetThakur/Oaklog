@@ -1,5 +1,6 @@
 package com.oaklog.app.presentation.explore
 
+import com.oaklog.app.presentation.components.SleekHeader
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -88,7 +89,7 @@ fun ExploreScreen(
     )
 
     Scaffold(
-        topBar = { OakTopBar(title = "Research Hub") },
+        topBar = { SleekHeader(overline = "EXPLORE", title = "Research hub") },
         modifier = modifier,
     ) { innerPadding ->
         Column(

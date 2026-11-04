@@ -29,19 +29,19 @@ data class TypeTint(
 fun typeTintFor(type: String?, dark: Boolean): TypeTint {
     val base = PokemonTypeColors.color(type ?: "unknown")
     return if (dark) {
-        // A deep wash of the hue over the dark panel, with light text mixed from the hue.
+        // A faint wash of the hue over the graphite surface, with near-white text carrying a hint of it.
         TypeTint(
-            container = lerp(DarkSurface, base, 0.34f),
-            onContainer = lerp(base, Color.White, 0.92f),
-            art = lerp(DarkSurface, base, 0.60f),
-            chip = Color.White.copy(alpha = 0.12f),
+            container = lerp(GraphiteSurface, base, 0.17f),
+            onContainer = lerp(Color(0xFFF2F3F5), base, 0.08f),
+            art = lerp(GraphiteSurface, base, 0.34f),
+            chip = Color.White.copy(alpha = 0.09f),
         )
     } else {
         TypeTint(
-            container = lerp(base, Color.White, 0.62f),
-            onContainer = lerp(base, Color.Black, 0.74f),
-            art = lerp(base, Color.White, 0.28f),
-            chip = Color.White.copy(alpha = 0.55f),
+            container = lerp(Color.White, base, 0.15f),
+            onContainer = lerp(Color(0xFF0F1115), base, 0.12f),
+            art = lerp(Color.White, base, 0.30f),
+            chip = Color.Black.copy(alpha = 0.06f),
         )
     }
 }
@@ -53,4 +53,19 @@ fun typeTint(type: String?): TypeTint {
 }
 
 /** Neutral panel used behind content that isn't a Pokémon (analysis, settings, databases). */
-fun neutralPanel(dark: Boolean): Color = if (dark) DarkSurface else LightPanel
+fun neutralPanel(dark: Boolean): Color = if (dark) GraphiteSurface else Color(0xFFF6F7F9)
+
+/** Surface the dark tints are mixed over; matches the dark scheme's `surface`. */
+private val GraphiteSurface = Color(0xFF16181D)
+
+/**
+ * Meaning-carrying colors for pills and icons: [Bad] for weaknesses, [Good] for resistances and
+ * completeness, [Special] for immunities. Built from type tints so they sit correctly on both palettes.
+ */
+enum class Tone(internal val hue: String) { Bad("fighting"), Good("grass"), Special("ghost"), Warn("fire") }
+
+@Composable
+fun toneTint(tone: Tone): TypeTint = typeTint(tone.hue)
+
+/** A solid mid-tone for bars and icons drawn straight on a card, readable on both palettes. */
+fun toneAccent(tone: Tone): Color = PokemonTypeColors.color(tone.hue)

@@ -30,6 +30,9 @@ import com.oaklog.app.presentation.components.TypeBadge
 import com.oaklog.app.presentation.theme.CardShape
 import com.oaklog.app.presentation.theme.ChipShape
 import com.oaklog.app.presentation.theme.PokemonTypeColors
+import com.oaklog.app.presentation.theme.Tone
+import com.oaklog.app.presentation.theme.toneAccent
+import com.oaklog.app.presentation.theme.toneTint
 
 /**
  * Tab 2: Synergy & Matchups (Defensive Profile, Shared Hazards, STAB Coverage)
@@ -269,13 +272,13 @@ fun TeamSynergyTab(
                             if (row.weakCount > 0) {
                                 Surface(
                                     shape = RoundedCornerShape(6.dp),
-                                    color = Color(0xFFFFEBEE),
+                                    color = toneTint(Tone.Bad).container,
                                 ) {
                                     Text(
                                         text = "${row.weakCount} Weak",
                                         fontSize = 11.sp,
                                         fontWeight = FontWeight.Bold,
-                                        color = Color(0xFFC62828),
+                                        color = toneTint(Tone.Bad).onContainer,
                                         modifier = Modifier.padding(horizontal = 6.dp, vertical = 3.dp),
                                     )
                                 }
@@ -283,13 +286,13 @@ fun TeamSynergyTab(
                             if (row.resistCount > 0) {
                                 Surface(
                                     shape = RoundedCornerShape(6.dp),
-                                    color = Color(0xFFE8F5E9),
+                                    color = toneTint(Tone.Good).container,
                                 ) {
                                     Text(
                                         text = "${row.resistCount} Resist",
                                         fontSize = 11.sp,
                                         fontWeight = FontWeight.Bold,
-                                        color = Color(0xFF2E7D32),
+                                        color = toneTint(Tone.Good).onContainer,
                                         modifier = Modifier.padding(horizontal = 6.dp, vertical = 3.dp),
                                     )
                                 }
@@ -297,13 +300,13 @@ fun TeamSynergyTab(
                             if (row.immuneCount > 0) {
                                 Surface(
                                     shape = RoundedCornerShape(6.dp),
-                                    color = Color(0xFFEDE7F6),
+                                    color = toneTint(Tone.Special).container,
                                 ) {
                                     Text(
                                         text = "${row.immuneCount} Immune",
                                         fontSize = 11.sp,
                                         fontWeight = FontWeight.Bold,
-                                        color = Color(0xFF512DA8),
+                                        color = toneTint(Tone.Special).onContainer,
                                         modifier = Modifier.padding(horizontal = 6.dp, vertical = 3.dp),
                                     )
                                 }
@@ -554,9 +557,9 @@ fun TeamSpeedTiersTab(
                                     .fillMaxWidth(fraction)
                                     .clip(RoundedCornerShape(4.dp))
                                     .background(
-                                        if (entry.baseSpeed >= 110) Color(0xFF2E7D32)
+                                        if (entry.baseSpeed >= 110) toneAccent(Tone.Good)
                                         else if (entry.baseSpeed >= 80) MaterialTheme.colorScheme.primary
-                                        else Color(0xFFE65100)
+                                        else toneAccent(Tone.Warn)
                                     ),
                             )
                         }
@@ -639,7 +642,7 @@ fun TeamOakAdviceTab(
                     Icon(
                         imageVector = Icons.Default.CheckCircle,
                         contentDescription = null,
-                        tint = Color(0xFF2E7D32),
+                        tint = toneAccent(Tone.Good),
                         modifier = Modifier.size(36.dp),
                     )
                     Text(

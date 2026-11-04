@@ -9,9 +9,10 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Tune
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -27,7 +28,7 @@ import com.oaklog.app.domain.logic.Natures
 import com.oaklog.app.presentation.components.DropdownOption
 import com.oaklog.app.presentation.components.EmptyView
 import com.oaklog.app.presentation.components.OakDropdown
-import com.oaklog.app.presentation.components.OakTopBar
+import com.oaklog.app.presentation.components.DatabasePage
 import com.oaklog.app.presentation.theme.CardShape
 import com.oaklog.app.presentation.theme.ChipShape
 import com.oaklog.app.presentation.theme.typeTint
@@ -52,12 +53,16 @@ fun NaturesScreen(
     val statOptions = listOf(DropdownOption("", "Any")) + STAT_NAMES.map { DropdownOption(it.key, it.value) }
     val (neutral, changing) = shown.partition { it.isNeutral }
 
-    Scaffold(
-        topBar = { OakTopBar(title = "Natures", canNavigateBack = true, onNavigateBack = onNavigateBack) },
+    DatabasePage(
+        title = "Natures",
+        subtitle = "25 natures · +10% to one stat, −10% to another",
+        color = "dragon",
+        icon = Icons.Default.Tune,
+        onNavigateBack = onNavigateBack,
         modifier = modifier,
-    ) { inner ->
+    ) {
         LazyColumn(
-            modifier = Modifier.fillMaxSize().padding(inner),
+            modifier = Modifier.fillMaxSize(),
             contentPadding = PaddingValues(16.dp),
             verticalArrangement = Arrangement.spacedBy(10.dp),
         ) {

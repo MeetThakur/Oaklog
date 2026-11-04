@@ -31,13 +31,24 @@ fun PokedexScreen(
     onSettingsClick: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
+    PokedexContent(viewModel, onPokemonClick, onSettingsClick, modifier)
+}
+
+@Composable
+private fun PokedexContent(
+    viewModel: PokedexViewModel,
+    onPokemonClick: (Int) -> Unit,
+    onSettingsClick: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
     val state by viewModel.uiState.collectAsState()
     var showFilterSheet by remember { mutableStateOf(false) }
 
     Scaffold(
         topBar = {
-            OakTopBar(
-                title = "OakLog Pokédex",
+            SleekHeader(
+                overline = "POKÉDEX",
+                title = "All species",
                 actions = {
                     val isDark = MaterialTheme.colorScheme.background.luminance() < 0.5f
                     IconButton(
@@ -189,7 +200,7 @@ fun PokedexScreen(
                             modifier = Modifier.fillMaxSize(),
                         ) {
                             items(state.pokemonList, key = { it.id }) { pokemon ->
-                                PokemonGridCard(
+                                SleekTile(
                                     pokemon = pokemon,
                                     collectionEntry = state.collectionMap[pokemon.id],
                                     onClick = { onPokemonClick(pokemon.id) },
@@ -206,7 +217,7 @@ fun PokedexScreen(
                             modifier = Modifier.fillMaxSize(),
                         ) {
                             items(state.pokemonList, key = { it.id }) { pokemon ->
-                                PokemonListCard(
+                                SleekRow(
                                     pokemon = pokemon,
                                     collectionEntry = state.collectionMap[pokemon.id],
                                     onClick = { onPokemonClick(pokemon.id) },

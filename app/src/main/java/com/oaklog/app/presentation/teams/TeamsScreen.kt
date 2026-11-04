@@ -1,5 +1,6 @@
 package com.oaklog.app.presentation.teams
 
+import com.oaklog.app.presentation.components.SleekHeader
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -35,6 +36,8 @@ import com.oaklog.app.presentation.components.OakTopBar
 import com.oaklog.app.presentation.components.TypeBadge
 import com.oaklog.app.presentation.theme.CardShape
 import com.oaklog.app.presentation.theme.ChipShape
+import com.oaklog.app.presentation.theme.Tone
+import com.oaklog.app.presentation.theme.toneTint
 import com.oaklog.app.presentation.theme.typeTint
 
 @Composable
@@ -51,7 +54,7 @@ fun TeamsScreen(
 
     Scaffold(
         topBar = {
-            OakTopBar(title = "Team Builder")
+            SleekHeader(overline = "TEAMS", title = "Team builder")
         },
         floatingActionButton = {
             ExtendedFloatingActionButton(
@@ -126,7 +129,7 @@ fun TeamsScreen(
                     onValueChange = { newTeamName = it },
                     label = { Text("Squad Name") },
                     singleLine = true,
-                    shape = RoundedCornerShape(14.dp),
+                    shape = RoundedCornerShape(20.dp),
                     modifier = Modifier.fillMaxWidth(),
                 )
             },
@@ -161,7 +164,7 @@ fun TeamsScreen(
                     onValueChange = { renameText = it },
                     label = { Text("Squad Name") },
                     singleLine = true,
-                    shape = RoundedCornerShape(14.dp),
+                    shape = RoundedCornerShape(20.dp),
                     modifier = Modifier.fillMaxWidth(),
                 )
             },
@@ -298,13 +301,13 @@ private fun TeamCard(
                     val isFull = team.members.size == 6
                     Surface(
                         shape = ChipShape,
-                        color = if (isFull) Color(0xFFE8F5E9) else MaterialTheme.colorScheme.surfaceVariant,
+                        color = if (isFull) toneTint(Tone.Good).container else MaterialTheme.colorScheme.surfaceVariant,
                     ) {
                         Text(
                             text = "${team.members.size}/6",
                             fontSize = 11.sp,
                             fontWeight = FontWeight.Bold,
-                            color = if (isFull) Color(0xFF2E7D32) else MaterialTheme.colorScheme.onSurfaceVariant,
+                            color = if (isFull) toneTint(Tone.Good).onContainer else MaterialTheme.colorScheme.onSurfaceVariant,
                             modifier = Modifier.padding(horizontal = 8.dp, vertical = 3.dp),
                         )
                     }

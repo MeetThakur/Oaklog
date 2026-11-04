@@ -5,7 +5,7 @@ import androidx.compose.ui.Modifier
 import com.oaklog.app.domain.model.CollectionEntry
 import com.oaklog.app.domain.model.PokemonSummary
 
-/** Grid cell: a full [TypeCard]. */
+/** Grid cell: the Graphite/Porcelain tile. */
 @Composable
 fun PokemonGridCard(
     pokemon: PokemonSummary,
@@ -14,9 +14,9 @@ fun PokemonGridCard(
     onCycleStatus: () -> Unit,
     onToggleFavorite: () -> Unit,
     modifier: Modifier = Modifier,
-) = TypeCard(pokemon, collectionEntry, onClick, onCycleStatus, onToggleFavorite, modifier)
+) = SleekTile(pokemon, collectionEntry, onClick, onCycleStatus, onToggleFavorite, modifier)
 
-/** List row: the same card, shorter, with type pills in a row. */
+/** List row with a hairline divider. */
 @Composable
 fun PokemonListCard(
     pokemon: PokemonSummary,
@@ -25,4 +25,4 @@ fun PokemonListCard(
     onCycleStatus: () -> Unit,
     onToggleFavorite: () -> Unit,
     modifier: Modifier = Modifier,
-) = TypeCard(pokemon, collectionEntry, onClick, onCycleStatus, onToggleFavorite, modifier, compact = true)
+) = SleekRow(pokemon, collectionEntry, onClick, onCycleStatus, onToggleFavorite, modifier)

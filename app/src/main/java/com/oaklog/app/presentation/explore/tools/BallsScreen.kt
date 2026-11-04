@@ -1,5 +1,7 @@
 package com.oaklog.app.presentation.explore.tools
 
+import androidx.compose.material.icons.filled.CatchingPokemon
+import com.oaklog.app.presentation.components.DatabasePage
 import androidx.compose.foundation.background
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
@@ -65,18 +67,23 @@ fun BallsScreen(
         }
     }
 
-    Scaffold(
-        topBar = { OakTopBar(title = "Poké Balls", canNavigateBack = true, onNavigateBack = onNavigateBack) },
+    DatabasePage(
+        title = "Poké Balls",
+        subtitle = "Catch multipliers and effects",
+        color = "poison",
+        icon = Icons.Default.CatchingPokemon,
+        onNavigateBack = onNavigateBack,
+        compact = true,
         modifier = modifier,
-    ) { inner ->
+    ) {
         when {
-            state.isLoading -> LoadingView(message = "Loading Poké Balls...", modifier = Modifier.padding(inner))
+            state.isLoading -> LoadingView(message = "Loading Poké Balls...", modifier = Modifier)
             state.failed -> ErrorView(
                 message = "Couldn't load the Poké Balls. Check your connection and try again.",
                 onRetry = viewModel::load,
-                modifier = Modifier.padding(inner),
+                modifier = Modifier,
             )
-            else -> Column(Modifier.fillMaxSize().padding(inner)) {
+            else -> Column(Modifier.fillMaxSize()) {
                 OutlinedTextField(
                     value = state.query,
                     onValueChange = viewModel::setQuery,

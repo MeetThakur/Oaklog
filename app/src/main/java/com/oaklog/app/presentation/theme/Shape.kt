@@ -8,12 +8,12 @@ import androidx.compose.ui.unit.dp
 val OakShapes = Shapes(
     extraSmall = RoundedCornerShape(8.dp),
     small = RoundedCornerShape(12.dp),
-    medium = RoundedCornerShape(16.dp),
-    large = RoundedCornerShape(24.dp),
+    medium = RoundedCornerShape(20.dp),
+    large = RoundedCornerShape(20.dp),
     extraLarge = RoundedCornerShape(32.dp),
 )
 
-val CardShape = RoundedCornerShape(24.dp)
+val CardShape = RoundedCornerShape(20.dp)
 val ChipShape = RoundedCornerShape(50)
 
 /** Content sheet that slides up over a Pokémon's tinted header. */

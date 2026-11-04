@@ -1,5 +1,7 @@
 package com.oaklog.app.presentation.compare
 
+import androidx.compose.material.icons.automirrored.filled.CompareArrows
+import com.oaklog.app.presentation.components.DatabasePage
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -60,14 +62,19 @@ fun CompareScreen(
     val state by viewModel.uiState.collectAsState()
     var picking by remember { mutableStateOf<Side?>(null) }
 
-    Scaffold(
-        topBar = { OakTopBar(title = "Compare", canNavigateBack = true, onNavigateBack = onNavigateBack) },
+    DatabasePage(
+        title = "Compare",
+        subtitle = "Two Pokémon side by side",
+        color = "flying",
+        icon = Icons.AutoMirrored.Filled.CompareArrows,
+        onNavigateBack = onNavigateBack,
+        compact = true,
         modifier = modifier,
-    ) { inner ->
+    ) {
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(inner)
+                
                 .verticalScroll(rememberScrollState())
                 .padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp),
@@ -109,7 +116,7 @@ fun CompareScreen(
 
 @Composable
 private fun Slot(detail: PokemonDetail?, loading: Boolean, modifier: Modifier, onClick: () -> Unit) {
-    Card(modifier = modifier.fillMaxHeight().clip(RoundedCornerShape(24.dp)).clickable(onClick = onClick)) {
+    Card(modifier = modifier.fillMaxHeight().clip(RoundedCornerShape(20.dp)).clickable(onClick = onClick)) {
         Column(
             modifier = Modifier.fillMaxSize().padding(12.dp),
             horizontalAlignment = Alignment.CenterHorizontally,

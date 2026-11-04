@@ -172,6 +172,11 @@ class PokemonRepositoryImpl @Inject constructor(
         /** Item categories PokéAPI files Poké Balls under, in the order the screen groups them. */
         val BALL_CATEGORIES = listOf("standard-balls", "special-balls", "apricorn-balls")
 
+        /** Categories of items made to be held; berries and plates have their own screens or are niche. */
+        val HELD_CATEGORIES = listOf(
+            "held-items", "choice", "type-enhancement", "bad-held-items", "in-a-pinch", "picky-healing",
+        )
+
         /** PokéAPI numbers alternate forms from 10001, so anything below is a species. */
         const val MAX_SPECIES_ID = 9999
     }
@@ -450,6 +455,26 @@ class PokemonRepositoryImpl @Inject constructor(
                     ?.let { NameFormatter.cleanFlavor(it) },
                 heldBy = HeldMapper.heldBy(dto.heldByPokemon),
             )
+        }
+    }
+
+    private val heldLock = Mutex()
+    private var heldItems: List<ItemInfo>? = null
+
+    override suspend fun getHeldItems(): Result<List<ItemInfo>> = withContext(Dispatchers.IO) {
+        runCatching {
+            heldItems?.let { return@runCatching it }
+            heldLock.withLock {
+                heldItems?.let { return@runCatching it }
+                val gate = Semaphore(HYDRATION_CONCURRENCY)
+                val refs = HELD_CATEGORIES.flatMap { category ->
+                    cache.get("item_category_$category", ItemCategoryDto.serializer()) { api.itemCategory(category) }.items
+                }.distinctBy { it.name }
+                val loaded = coroutineScope {
+                    refs.map { ref -> async { gate.withPermit { getItem(ref.name).getOrThrow() } } }.awaitAll()
+                }
+                loaded.sortedBy { it.name }.also { heldItems = it }
+            }
         }
     }
 

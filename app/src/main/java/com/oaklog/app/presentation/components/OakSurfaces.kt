@@ -27,7 +27,7 @@ fun Card(
     shape: Shape = CardShape,
     colors: CardColors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
     @Suppress("UNUSED_PARAMETER") elevation: CardElevation = CardDefaults.cardElevation(),
-    border: BorderStroke? = null,
+    border: BorderStroke? = BorderStroke(0.5.dp, MaterialTheme.colorScheme.outline),
     content: @Composable ColumnScope.() -> Unit,
 ) {
     androidx.compose.material3.Card(
@@ -47,7 +47,7 @@ fun Card(
     shape: Shape = CardShape,
     colors: CardColors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
     @Suppress("UNUSED_PARAMETER") elevation: CardElevation = CardDefaults.cardElevation(),
-    border: BorderStroke? = null,
+    border: BorderStroke? = BorderStroke(0.5.dp, MaterialTheme.colorScheme.outline),
     content: @Composable ColumnScope.() -> Unit,
 ) {
     androidx.compose.material3.Card(

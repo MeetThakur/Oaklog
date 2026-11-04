@@ -102,8 +102,8 @@ fun PokemonPickerSheet(
                         },
                         modifier = Modifier
                             .fillMaxWidth()
-                            .clip(RoundedCornerShape(14.dp)),
-                        shape = RoundedCornerShape(14.dp),
+                            .clip(RoundedCornerShape(20.dp)),
+                        shape = RoundedCornerShape(20.dp),
                         colors = CardDefaults.cardColors(containerColor = tint.container),
                     ) {
                         Row(
