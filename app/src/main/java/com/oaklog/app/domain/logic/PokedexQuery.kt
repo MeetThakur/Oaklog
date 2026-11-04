@@ -67,8 +67,9 @@ object PokedexQuery {
     private fun matchesQuery(p: PokemonSummary, q: String, numeric: Int?): Boolean {
         if (q.isEmpty()) return true
         if (numeric != null && (p.id == numeric || p.id.toString().startsWith(q))) return true
-        val normalized = p.name.replace("-", " ")
-        return p.name.contains(q) || normalized.contains(q)
+        // The index stores display names ("Arceus"), while the query is lowercased.
+        val name = p.name.lowercase()
+        return name.contains(q) || name.replace("-", " ").contains(q)
     }
 
     fun sort(list: List<PokemonSummary>, f: PokedexFilters): List<PokemonSummary> {

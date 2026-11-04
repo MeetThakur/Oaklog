@@ -11,12 +11,12 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.AutoAwesome
+import androidx.compose.material.icons.automirrored.filled.VolumeUp
+import androidx.compose.material.icons.automirrored.outlined.CompareArrows
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.FavoriteBorder
 import androidx.compose.material.icons.filled.Female
 import androidx.compose.material.icons.filled.Male
-import androidx.compose.material.icons.filled.VolumeUp
-import androidx.compose.material.icons.outlined.CompareArrows
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -137,7 +137,7 @@ fun PokemonDetailScreen(
                                 Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                                     HeaderIconButton(
                                         onClick = { onCompare(detail.speciesId) },
-                                        icon = Icons.Outlined.CompareArrows,
+                                        icon = Icons.AutoMirrored.Outlined.CompareArrows,
                                         description = "Compare",
                                         tint = tint,
                                     )
@@ -238,7 +238,7 @@ fun PokemonDetailScreen(
                             )
                             if (detail.criesUrl != null) {
                                 Icon(
-                                    imageVector = Icons.Default.VolumeUp,
+                                    imageVector = Icons.AutoMirrored.Filled.VolumeUp,
                                     contentDescription = "Play cry",
                                     tint = tint.onContainer.copy(alpha = 0.8f),
                                     modifier = Modifier.align(Alignment.BottomEnd).padding(10.dp).size(20.dp),
@@ -248,7 +248,7 @@ fun PokemonDetailScreen(
                     }
                     Spacer(Modifier.height(84.dp))
 
-                    ScrollableTabRow(
+                    PrimaryScrollableTabRow(
                         selectedTabIndex = selectedTabIndex,
                         containerColor = MaterialTheme.colorScheme.background,
                         contentColor = MaterialTheme.colorScheme.primary,

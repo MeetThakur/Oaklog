@@ -94,6 +94,15 @@ class PokedexQueryTest {
     )
 
     @Test
+    fun querySearchIsCaseInsensitiveAgainstDisplayNames() {
+        val arceus = sampleData.first().copy(id = 493, name = "Arceus")
+        val result = PokedexQuery.apply(listOf(arceus), emptyMap(), PokedexFilters(query = "arceu"))
+        assertEquals(listOf(493), result.map { it.id })
+        val upper = PokedexQuery.apply(listOf(arceus), emptyMap(), PokedexFilters(query = "ARCEUS"))
+        assertEquals(1, upper.size)
+    }
+
+    @Test
     fun querySearchByName() {
         val result = PokedexQuery.apply(sampleData, sampleCollection, PokedexFilters(query = "pika"))
         assertEquals(1, result.size)

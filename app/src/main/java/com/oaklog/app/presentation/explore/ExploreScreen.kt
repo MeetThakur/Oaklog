@@ -16,9 +16,9 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.CompareArrows
 import androidx.compose.material.icons.filled.AutoAwesome
 import androidx.compose.material.icons.filled.Calculate
-import androidx.compose.material.icons.filled.CompareArrows
 import androidx.compose.material.icons.filled.FlashOn
 import androidx.compose.material.icons.filled.Inventory2
 import androidx.compose.material.icons.filled.Map
@@ -63,7 +63,7 @@ fun ExploreScreen(
     modifier: Modifier = Modifier,
 ) {
     val tools = listOf(
-        Tool("Compare", "Two Pokémon side by side.", Icons.Default.CompareArrows, "flying", onNavigateToCompare),
+        Tool("Compare", "Two Pokémon side by side.", Icons.AutoMirrored.Filled.CompareArrows, "flying", onNavigateToCompare),
         Tool("Calculator", "Stats and damage.", Icons.Default.Calculate, "electric", onNavigateToCalculator),
         Tool("Type chart", "Damage multipliers.", Icons.Default.FlashOn, "psychic", onNavigateToTypeChart),
         Tool("Moves", "Power, accuracy, effects.", Icons.Default.AutoAwesome, "fire", onNavigateToMoves),

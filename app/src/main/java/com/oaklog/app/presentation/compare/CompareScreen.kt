@@ -20,8 +20,8 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.outlined.CompareArrows
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.outlined.CompareArrows
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
@@ -87,7 +87,7 @@ fun CompareScreen(
                     EmptyView(
                         title = "Pick two Pokémon",
                         subtitle = "Choose both slots to compare stats, typing, size and abilities side by side.",
-                        icon = Icons.Outlined.CompareArrows,
+                        icon = Icons.AutoMirrored.Outlined.CompareArrows,
                     )
                 }
             } else {
