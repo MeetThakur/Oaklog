@@ -18,6 +18,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.CompareArrows
 import androidx.compose.material.icons.filled.AutoAwesome
+import androidx.compose.material.icons.filled.Bookmark
 import androidx.compose.material.icons.filled.Calculate
 import androidx.compose.material.icons.filled.FlashOn
 import androidx.compose.material.icons.filled.Inventory2
@@ -53,6 +54,7 @@ private data class Tool(
 fun ExploreScreen(
     viewModel: ExploreViewModel,
     onNavigateToSearch: () -> Unit,
+    onNavigateToCollection: () -> Unit,
     onNavigateToTypeChart: () -> Unit,
     onNavigateToMoves: () -> Unit,
     onNavigateToAbilities: () -> Unit,
@@ -63,6 +65,7 @@ fun ExploreScreen(
     modifier: Modifier = Modifier,
 ) {
     val tools = listOf(
+        Tool("Collection", "Pokédex tracker & catches.", Icons.Default.Bookmark, "dragon", onNavigateToCollection),
         Tool("Compare", "Two Pokémon side by side.", Icons.AutoMirrored.Filled.CompareArrows, "flying", onNavigateToCompare),
         Tool("Calculator", "Stats and damage.", Icons.Default.Calculate, "electric", onNavigateToCalculator),
         Tool("Type chart", "Damage multipliers.", Icons.Default.FlashOn, "psychic", onNavigateToTypeChart),

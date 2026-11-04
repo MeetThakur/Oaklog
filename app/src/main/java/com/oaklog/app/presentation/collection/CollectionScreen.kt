@@ -44,13 +44,18 @@ fun CollectionScreen(
     viewModel: CollectionViewModel,
     onPokemonClick: (Int) -> Unit,
     onBrowsePokedex: () -> Unit,
+    onNavigateBack: () -> Unit = {},
     modifier: Modifier = Modifier,
 ) {
     val state by viewModel.uiState.collectAsState()
 
     Scaffold(
         topBar = {
-            OakTopBar(title = "Research Collection")
+            OakTopBar(
+                title = "Research Collection",
+                canNavigateBack = true,
+                onNavigateBack = onNavigateBack,
+            )
         },
         modifier = modifier,
     ) { innerPadding ->

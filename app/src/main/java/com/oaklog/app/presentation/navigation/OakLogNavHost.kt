@@ -96,7 +96,7 @@ fun OakLogNavHost(
                     )
                 }
 
-                // ---- TAB 3: COLLECTION --------------------------------------------------------
+                // ---- COLLECTION (EXPLORE TOOL) -----------------------------------------------
                 composable(Screen.Collection.route) {
                     CompositionLocalProvider(
                         LocalSharedTransitionScope provides this@SharedTransitionLayout,
@@ -106,6 +106,7 @@ fun OakLogNavHost(
                         CollectionScreen(
                             viewModel = viewModel,
                             onPokemonClick = openPokemon,
+                            onNavigateBack = { navController.popBackStack() },
                             onBrowsePokedex = {
                                 navController.navigate(Screen.Pokedex.route) {
                                     popUpTo(Screen.Pokedex.route) { inclusive = false }
@@ -116,12 +117,13 @@ fun OakLogNavHost(
                     }
                 }
 
-                // ---- TAB 4: EXPLORE -----------------------------------------------------------
+                // ---- TAB 3: EXPLORE -----------------------------------------------------------
                 composable(Screen.Explore.route) {
                     val viewModel: ExploreViewModel = hiltViewModel()
                     ExploreScreen(
                         viewModel = viewModel,
                         onNavigateToSearch = { navController.navigate(Screen.Search.route) },
+                        onNavigateToCollection = { navController.navigate(Screen.Collection.route) },
                         onNavigateToTypeChart = { navController.navigate(Screen.TypeChart.route) },
                         onNavigateToMoves = { navController.navigate(Screen.MovesDatabase.route) },
                         onNavigateToAbilities = { navController.navigate(Screen.AbilitiesDatabase.route) },

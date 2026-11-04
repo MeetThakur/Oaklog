@@ -66,12 +66,6 @@ val bottomNavItems = listOf(
         unselectedIcon = Icons.Outlined.Group,
     ),
     BottomNavItem(
-        screen = Screen.Collection,
-        title = "Collection",
-        selectedIcon = Icons.Filled.Bookmark,
-        unselectedIcon = Icons.Outlined.BookmarkBorder,
-    ),
-    BottomNavItem(
         screen = Screen.Explore,
         title = "Explore",
         selectedIcon = Icons.Filled.Explore,
